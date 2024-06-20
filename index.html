@@ -20,7 +20,7 @@
             width: 100%;
             border-collapse: collapse;
             margin: 0 auto;
-            max-width: 600px; /* Ограничение ширины для удобства на мобильных устройствах */
+            max-width: 600px;
         }
         .calendar th, .calendar td {
             border: 1px solid #ddd;
@@ -43,7 +43,6 @@
             color: #186647;
         }
 
-        /* Медиа-запросы для мобильных устройств */
         @media only screen and (max-width: 600px) {
             .form-container {
                 text-align: center;
@@ -82,7 +81,7 @@
     <script>
         const scheduleData = {
             '-2+4': [
-                ["00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 24:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00"],                
+                ["00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 24:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00"],
                 ["02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 24:00"],
                 ["04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 24:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00"],
                 ["00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 24:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00"],
@@ -120,7 +119,7 @@
                 const cellClass = isCurrentDay ? 'current-day' : 'other-days';
 
                 let cellContent = `<span class="day">${day}.${currentMonth.toString().padStart(2, '0')}</span><br><br>${scheduleTimes[timeIndex].replace(/\n/g, '<br>')}`;
-                
+
                 if (isCurrentDay) {
                     cellContent += '<br><br><div id="countdown"></div>';
                 }
@@ -142,62 +141,98 @@
 
         function updateCountdown(queue, schedule) {
             const now = new Date();
-            const currentHour = now.getHours();
-            const currentMinute = now.getMinutes();
-            const currentTime = currentHour * 60 + currentMinute;
+            let currentTime = now.getHours() * 60 + now.getMinutes();
+            let todaySchedule = scheduleData[schedule][queue - 1][(now.getDate() - 1) % scheduleData[schedule][queue - 1].length];
+            let timeRanges = getTimeRanges(todaySchedule);
+            let nextOutage = null;
+            let timeUntilNextOutage = Infinity;
+            let currentOutage = null;
+            let isNextDay = false;
 
-            const todaySchedule = scheduleData[schedule][queue - 1][(now.getDate() - 1) % scheduleData[schedule][queue - 1].length];
-            const timeRanges = todaySchedule.split('\n\n').map(range => {
+            // Проверка текущего дня
+            [currentOutage, nextOutage, timeUntilNextOutage] = checkOutages(timeRanges, currentTime);
+
+            // Если нет отключений сегодня, проверяем следующий день
+            if (!currentOutage && !nextOutage) {
+                const tomorrow = new Date(now);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                todaySchedule = scheduleData[schedule][queue - 1][(tomorrow.getDate() - 1) % scheduleData[schedule][queue - 1].length];
+                timeRanges = getTimeRanges(todaySchedule);
+                [, nextOutage, timeUntilNextOutage] = checkOutages(timeRanges, 0);
+                isNextDay = true;
+            }
+
+            const countdownElement = document.getElementById('countdown');
+
+            if (currentOutage) {
+                updateTimer(currentOutage.end, 'До включення');
+            } else if (nextOutage) {
+                updateTimer(nextOutage.start, 'До відключення', isNextDay);
+            } else {
+                countdownElement.innerHTML = 'Відключень не очікується';
+            }
+        }
+
+        function checkOutages(timeRanges, currentTime) {
+            let nextOutage = null;
+            let timeUntilNextOutage = Infinity;
+            let currentOutage = null;
+
+            for (let range of timeRanges) {
+                if (range.end < range.start) { // handle ranges that span midnight
+                    if (currentTime >= range.start || currentTime < range.end) {
+                        currentOutage = range;
+                        break;
+                    }
+                } else if (currentTime >= range.start && currentTime < range.end) {
+                    currentOutage = range;
+                    break;
+                }
+
+                const timeUntil = (range.start - currentTime + 1440) % 1440;
+                if (timeUntil < timeUntilNextOutage) {
+                    timeUntilNextOutage = timeUntil;
+                    nextOutage = range;
+                }
+            }
+
+            return [currentOutage, nextOutage, timeUntilNextOutage];
+        }
+
+        function getTimeRanges(schedule) {
+            return schedule.split('\n\n').map(range => {
                 const [start, end] = range.split(' - ');
                 return {
                     start: timeToMinutes(start),
                     end: timeToMinutes(end)
                 };
             });
+        }
 
-            let nextOutage = null;
-            let timeUntilNextOutage = Infinity;
+        function updateTimer(targetTime, message, isNextDay = false) {
+            const countdownElement = document.getElementById('countdown');
 
-            for (let range of timeRanges) {
-                if (range.end < range.start) { // handle ranges that span midnight
-                    if (currentTime >= range.start || currentTime < range.end) {
-                        const timeLeft = currentTime >= range.start ? (range.end + 1440) - currentTime : range.end - currentTime;
-                        document.getElementById('countdown').innerHTML = `До включення:<br><span class="countdown-time">${Math.floor(timeLeft / 60)}г ${timeLeft % 60}хв</span>`;
-                        setTimeout(() => updateCountdown(queue, schedule), 60000);
-                        return;
-                    } else {
-                        const timeUntil = range.start - currentTime;
-                        if (timeUntil < 0) {
-                            timeUntil += 1440; // add a day in minutes if timeUntil is negative
-                        }
-                        if (timeUntil < timeUntilNextOutage) {
-                            timeUntilNextOutage = timeUntil;
-                            nextOutage = range;
-                        }
-                    }
+            function update() {
+                const now = new Date();
+                let currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+                let timeLeft = (targetTime * 60 - currentTime + 86400) % 86400; // в секундах
+
+                if (isNextDay) {
+                    timeLeft += 86400; // добавляем 24 часа, если это следующий день
+                }
+
+                if (timeLeft > 0) {
+                    const hours = Math.floor(timeLeft / 3600);
+                    const minutes = Math.floor((timeLeft % 3600) / 60);
+                    const seconds = timeLeft % 60;
+                    countdownElement.innerHTML = `${message}${isNextDay ? ' (завтра)' : ''}:<br><span class="countdown-time">${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}</span>`;
+                    setTimeout(update, 1000);
                 } else {
-                    if (currentTime >= range.start && currentTime < range.end) {
-                        const timeLeft = range.end - currentTime;
-                        document.getElementById('countdown').innerHTML = `До включення:<br><span class="countdown-time">${Math.floor(timeLeft / 60)}г ${timeLeft % 60}хв</span>`;
-                        setTimeout(() => updateCountdown(queue, schedule), 60000);
-                        return;
-                    } else if (currentTime < range.start) {
-                        const timeUntil = range.start - currentTime;
-                        if (timeUntil < timeUntilNextOutage) {
-                            timeUntilNextOutage = timeUntil;
-                            nextOutage = range;
-                        }
-                    }
+                    updateCountdown(document.getElementById('queue').value, document.getElementById('schedule').value);
                 }
             }
 
-            if (nextOutage) {
-                document.getElementById('countdown').innerHTML = `До відключення:<br><span class="countdown-time">${Math.floor(timeUntilNextOutage / 60)}г ${timeUntilNextOutage % 60}хв</span>`;
-            } else {
-                document.getElementById('countdown').innerHTML = 'Сьогодні більше відключень не очікується';
-            }
-
-            setTimeout(() => updateCountdown(queue, schedule), 60000);
+            update();
         }
 
         function timeToMinutes(time) {
