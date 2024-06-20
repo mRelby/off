@@ -20,6 +20,7 @@
             width: 100%;
             border-collapse: collapse;
             margin: 0 auto;
+            max-width: 600px; /* Ограничение ширины для удобства на мобильных устройствах */
         }
         .calendar th, .calendar td {
             border: 1px solid #ddd;
@@ -28,7 +29,7 @@
             vertical-align: top;
         }
         .calendar td.current-day {
-            background-color: #ffeb3b;
+            background-color: #FFF5F5;
         }
         .calendar td.other-days {
             background-color: #F5F5F5;
@@ -38,7 +39,19 @@
             font-weight: bold;
         }
         .countdown-time {
+            font-weight: bold;
             color: #186647;
+        }
+
+        /* Медиа-запросы для мобильных устройств */
+        @media only screen and (max-width: 600px) {
+            .form-container {
+                text-align: center;
+                margin-bottom: 10px;
+            }
+            .calendar {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
