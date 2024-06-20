@@ -5,20 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Графік відключень</title>
     <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --border-color: #ddd;
+            --calendar-background: #F5F5F5;
+            --current-day-background: #FFF5F5;
+            --countdown-color: #186647;
+            --button-background: #4CAF50;
+            --button-hover: #45a049;
+            --button-active: #3e8e41;
+            --select-background: #ffffff;
+        }
+    
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background-color: #1a1a1a;
+                --text-color: #ffffff;
+                --border-color: #444;
+                --calendar-background: #2a2a2a;
+                --current-day-background: #3a3a3a;
+                --countdown-color: #4CAF50;
+                --button-background: #4CAF50;
+                --button-hover: #45a049;
+                --button-active: #3e8e41;
+                --select-background: #2a2a2a;
+            }
+        }
+    
         html, body {
             scroll-behavior: smooth;
         }
+    
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
         }
+    
         h1, h2 {
             text-align: center;
         }
+    
         .form-container {
             text-align: center;
             margin-bottom: 20px;
         }
+    
         .calendar {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -26,39 +60,30 @@
             max-width: 1200px;
             margin: 0 auto;
         }
+    
         .calendar-day {
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             padding: 10px;
             text-align: left;
-            background-color: #F5F5F5;
+            background-color: var(--calendar-background);
         }
+    
         .calendar-day.current-day {
-            background-color: #FFF5F5;
+            background-color: var(--current-day-background);
         }
+    
         .day-number {
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 10px; /* Увеличенный отступ под датой */
         }
+    
+        .countdown-container {
+            margin-top: 10px; /* Отступ перед уведомлением или таймером */
+        }
+    
         .countdown-time {
             font-weight: bold;
-            color: #186647;
-        }
-
-        @media only screen and (max-width: 768px) {
-            .form-container {
-                text-align: center;
-                margin-bottom: 10px;
-            }
-            .calendar {
-                grid-template-columns: 1fr;
-            }
-            .calendar-day {
-                font-size: 16px;
-                padding: 15px;
-            }
-            .day-number {
-                font-size: 18px;
-            }
+            color: var(--countdown-color);
         }
     
         .form-container {
@@ -68,74 +93,88 @@
             gap: 20px;
             margin-bottom: 30px;
             width: 100%;
-            max-width: 400px; /* Максимальная ширина формы */
+            max-width: 400px;
             margin-left: auto;
             margin-right: auto;
         }
-        
+    
         .form-group {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
             width: 100%;
         }
-        
+    
         .form-group label {
             margin-bottom: 5px;
             font-weight: bold;
         }
-        
+    
         select, button {
             width: 100%;
             font-size: 16px;
             padding: 10px 15px;
             border-radius: 5px;
-            border: 1px solid #ccc;
-            background-color: #fff;
+            border: 1px solid var(--border-color);
+            background-color: var(--select-background);
+            color: var(--text-color);
             transition: all 0.3s ease;
         }
-        
+    
         select {
             appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
-            background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+            background-image: url('data:image/svg+xml;utf8,<svg fill="currentColor" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
             background-repeat: no-repeat;
             background-position-x: calc(100% - 10px);
             background-position-y: 50%;
             padding-right: 35px;
         }
-        
+    
         select:hover, button:hover {
-            border-color: #888;
+            border-color: var(--button-hover);
         }
-        
+    
         select:focus, button:focus {
             outline: none;
-            border-color: #4CAF50;
+            border-color: var(--button-background);
             box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
         }
-        
+    
         button {
-            background-color: #4CAF50;
+            background-color: var(--button-background);
             color: white;
             cursor: pointer;
             border: none;
         }
-        
+    
         button:hover {
-            background-color: #45a049;
+            background-color: var(--button-hover);
         }
-        
+    
         button:active {
-            background-color: #3e8e41;
+            background-color: var(--button-active);
         }
-        
+    
         @media only screen and (max-width: 768px) {
             .form-container {
                 max-width: 90%;
             }
-        
+    
+            .calendar {
+                grid-template-columns: 1fr;
+            }
+    
+            .calendar-day {
+                font-size: 16px;
+                padding: 15px;
+            }
+    
+            .day-number {
+                font-size: 18px;
+            }
+    
             select, button {
                 font-size: 14px;
                 padding: 8px 12px;
@@ -211,7 +250,7 @@
                 let cellContent = `<div class="day-number">${day}.${currentMonth.toString().padStart(2, '0')}</div>${scheduleTimes[timeIndex].replace(/\n/g, '<br>')}`;
         
                 if (isCurrentDay) {
-                    cellContent += '<div id="countdown"></div>';
+                    cellContent += '<div class="countdown-container" id="countdown"></div>';
                 }
         
                 calendarHTML += `<div id="${isCurrentDay ? 'current-day-cell' : ''}" class="${cellClass}">${cellContent}</div>`;
