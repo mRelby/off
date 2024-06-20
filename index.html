@@ -24,17 +24,17 @@
         .calendar th, .calendar td {
             border: 1px solid #ddd;
             padding: 10px;
-            text-align: center;
+            text-align: left; /* Выравниваем содержимое ячеек по левому краю */
+            vertical-align: top; /* Выравниваем содержимое ячеек по верхнему краю */
         }
         .calendar td.current-day {
-            font-weight: bold;
             background-color: #ffeb3b;
         }
         .calendar td.other-days {
             background-color: #F5F5F5;
             opacity: 0.5;
         }
-        .calendar td.current-day span.day {
+        .calendar td span.day {
             font-weight: bold;
         }
     </style>
