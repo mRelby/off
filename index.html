@@ -24,18 +24,21 @@
         .calendar th, .calendar td {
             border: 1px solid #ddd;
             padding: 10px;
-            text-align: left; /* Выравниваем содержимое ячеек по левому краю */
-            vertical-align: top; /* Выравниваем содержимое ячеек по верхнему краю */
+            text-align: left;
+            vertical-align: top;
         }
         .calendar td.current-day {
             background-color: #ffeb3b;
         }
         .calendar td.other-days {
             background-color: #F5F5F5;
-            opacity: 0.5;
+            opacity: 0.25;
         }
         .calendar td span.day {
             font-weight: bold;
+        }
+        .countdown-time {
+            color: #186647;
         }
     </style>
 </head>
@@ -66,20 +69,20 @@
     <script>
         const scheduleData = {
             '-2+4': [
-                ["00:00 - 02:00; 06:00 - 08:00; 12:00 - 14:00; 18:00 - 20:00", "02:00 - 04:00; 08:00 - 10:00; 14:00 - 16:00; 20:00 - 22:00", "04:00 - 06:00; 10:00 - 12:00; 16:00 - 18:00; 22:00 - 00:00"],
-                ["02:00 - 04:00; 08:00 - 10:00; 14:00 - 16:00; 20:00 - 22:00", "00:00 - 02:00; 06:00 - 08:00; 12:00 - 14:00; 18:00 - 20:00", "04:00 - 06:00; 10:00 - 12:00; 16:00 - 18:00; 22:00 - 00:00"],
-                ["04:00 - 06:00; 10:00 - 12:00; 16:00 - 18:00; 22:00 - 00:00", "02:00 - 04:00; 08:00 - 10:00; 14:00 - 16:00; 20:00 - 22:00", "00:00 - 02:00; 06:00 - 08:00; 12:00 - 14:00; 18:00 - 20:00"],
-                ["00:00 - 02:00; 06:00 - 08:00; 12:00 - 14:00; 18:00 - 20:00", "04:00 - 06:00; 10:00 - 12:00; 16:00 - 18:00; 22:00 - 00:00", "02:00 - 04:00; 08:00 - 10:00; 14:00 - 16:00; 20:00 - 22:00"],
-                ["02:00 - 04:00; 08:00 - 10:00; 14:00 - 16:00; 20:00 - 22:00", "00:00 - 02:00; 06:00 - 08:00; 12:00 - 14:00; 18:00 - 20:00", "04:00 - 06:00; 10:00 - 12:00; 16:00 - 18:00; 22:00 - 00:00"],
-                ["04:00 - 06:00; 10:00 - 12:00; 16:00 - 18:00; 22:00 - 00:00", "02:00 - 04:00; 08:00 - 10:00; 14:00 - 16:00; 20:00 - 22:00", "00:00 - 02:00; 06:00 - 08:00; 12:00 - 14:00; 18:00 - 20:00"]
+                ["00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 00:00"],
+                ["02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 00:00"],
+                ["04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 00:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00"],
+                ["00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 00:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00"],
+                ["02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 00:00"],
+                ["04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 00:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00"]
             ],
             '-2+10': [
-                ["00:00 - 02:00; 12:00 - 14:00", "04:00 - 06:00; 16:00 - 18:00", "02:00 - 04:00; 14:00 - 16:00", "06:00 - 08:00; 18:00 - 20:00", "10:00 - 12:00; 20:00 - 22:00", "08:00 - 10:00; 22:00 - 00:00"],
-                ["02:00 - 04:00; 14:00 - 16:00", "00:00 - 02:00; 12:00 - 14:00", "04:00 - 06:00; 16:00 - 18:00", "08:00 - 10:00; 20:00 - 22:00", "12:00 - 14:00; 22:00 - 00:00", "10:00 - 12:00; 18:00 - 20:00"],
-                ["04:00 - 06:00; 16:00 - 18:00", "02:00 - 04:00; 14:00 - 16:00", "00:00 - 02:00; 12:00 - 14:00", "10:00 - 12:00; 22:00 - 00:00", "06:00 - 08:00; 18:00 - 20:00", "08:00 - 10:00; 20:00 - 22:00"],
-                ["06:00 - 08:00; 18:00 - 20:00", "04:00 - 06:00; 16:00 - 18:00", "02:00 - 04:00; 14:00 - 16:00", "00:00 - 02:00; 12:00 - 14:00", "08:00 - 10:00; 20:00 - 22:00", "10:00 - 12:00; 22:00 - 00:00"],
-                ["08:00 - 10:00; 20:00 - 22:00", "06:00 - 08:00; 18:00 - 20:00", "04:00 - 06:00; 16:00 - 18:00", "02:00 - 04:00; 14:00 - 16:00", "00:00 - 02:00; 12:00 - 14:00", "12:00 - 14:00; 22:00 - 00:00"],
-                ["10:00 - 12:00; 22:00 - 00:00", "08:00 - 10:00; 20:00 - 22:00", "06:00 - 08:00; 18:00 - 20:00", "04:00 - 06:00; 16:00 - 18:00", "02:00 - 04:00; 14:00 - 16:00", "00:00 - 02:00; 12:00 - 14:00"]
+                ["00:00 - 02:00\n\n12:00 - 14:00", "04:00 - 06:00\n\n16:00 - 18:00", "02:00 - 04:00\n\n14:00 - 16:00", "06:00 - 08:00\n\n18:00 - 20:00", "10:00 - 12:00\n\n20:00 - 22:00", "08:00 - 10:00\n\n22:00 - 00:00"],
+                ["02:00 - 04:00\n\n14:00 - 16:00", "00:00 - 02:00\n\n12:00 - 14:00", "04:00 - 06:00\n\n16:00 - 18:00", "08:00 - 10:00\n\n20:00 - 22:00", "12:00 - 14:00\n\n22:00 - 00:00", "10:00 - 12:00\n\n18:00 - 20:00"],
+                ["04:00 - 06:00\n\n16:00 - 18:00", "02:00 - 04:00\n\n14:00 - 16:00", "00:00 - 02:00\n\n12:00 - 14:00", "10:00 - 12:00\n\n22:00 - 00:00", "06:00 - 08:00\n\n18:00 - 20:00", "08:00 - 10:00\n\n20:00 - 22:00"],
+                ["06:00 - 08:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n16:00 - 18:00", "02:00 - 04:00\n\n14:00 - 16:00", "00:00 - 02:00\n\n12:00 - 14:00", "08:00 - 10:00\n\n20:00 - 22:00", "10:00 - 12:00\n\n22:00 - 00:00"],
+                ["08:00 - 10:00\n\n20:00 - 22:00", "06:00 - 08:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n16:00 - 18:00", "02:00 - 04:00\n\n14:00 - 16:00", "00:00 - 02:00\n\n12:00 - 14:00", "12:00 - 14:00\n\n22:00 - 00:00"],
+                ["10:00 - 12:00\n\n22:00 - 00:00", "08:00 - 10:00\n\n20:00 - 22:00", "06:00 - 08:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n16:00 - 18:00", "02:00 - 04:00\n\n14:00 - 16:00", "00:00 - 02:00\n\n12:00 - 14:00"]
             ]
         };
 
@@ -90,6 +93,7 @@
 
             const today = new Date();
             const currentDay = today.getDate();
+            const currentMonth = today.getMonth() + 1;
 
             const scheduleTimes = scheduleData[schedule][queue - 1];
             const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
@@ -102,7 +106,13 @@
                 const isCurrentDay = (day === currentDay);
                 const cellClass = isCurrentDay ? 'current-day' : 'other-days';
 
-                calendarHTML += `<td class="${cellClass}"><span class="day">${day}</span><br>${scheduleTimes[timeIndex]}</td>`;
+                let cellContent = `<span class="day">${day}.${currentMonth.toString().padStart(2, '0')}</span><br><br>${scheduleTimes[timeIndex].replace(/\n/g, '<br>')}`;
+                
+                if (isCurrentDay) {
+                    cellContent += '<br><br><div id="countdown"></div>';
+                }
+
+                calendarHTML += `<td class="${cellClass}">${cellContent}</td>`;
 
                 if (day % 7 === 0) {
                     calendarHTML += '</tr><tr>';
@@ -111,6 +121,58 @@
 
             calendarHTML += '</tr></table>';
             calendarContainer.innerHTML = calendarHTML;
+
+            if (document.getElementById('countdown')) {
+                updateCountdown(queue, schedule);
+            }
+        }
+
+        function updateCountdown(queue, schedule) {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentTime = currentHour * 60 + currentMinute;
+
+            const todaySchedule = scheduleData[schedule][queue - 1][(now.getDate() - 1) % scheduleData[schedule][queue - 1].length];
+            const timeRanges = todaySchedule.split('\n\n').map(range => {
+                const [start, end] = range.split(' - ');
+                return {
+                    start: timeToMinutes(start),
+                    end: timeToMinutes(end)
+                };
+            });
+
+            let nextOutage = null;
+            let timeUntilNextOutage = Infinity;
+
+            for (let range of timeRanges) {
+                if (currentTime >= range.start && currentTime < range.end) {
+                    // Мы находимся в периоде отключения
+                    const timeLeft = range.end - currentTime;
+                    document.getElementById('countdown').innerHTML = `До включення:<br><span class="countdown-time">${Math.floor(timeLeft / 60)}г ${timeLeft % 60}хв</span>`;
+                    setTimeout(() => updateCountdown(queue, schedule), 60000);
+                    return;
+                } else if (currentTime < range.start) {
+                    const timeUntil = range.start - currentTime;
+                    if (timeUntil < timeUntilNextOutage) {
+                        timeUntilNextOutage = timeUntil;
+                        nextOutage = range;
+                    }
+                }
+            }
+
+            if (nextOutage) {
+                document.getElementById('countdown').innerHTML = `До відключення:<br><span class="countdown-time">${Math.floor(timeUntilNextOutage / 60)}г ${timeUntilNextOutage % 60}хв</span>`;
+            } else {
+                document.getElementById('countdown').innerHTML = 'Сьогодні більше відключень не очікується';
+            }
+
+            setTimeout(() => updateCountdown(queue, schedule), 60000);
+        }
+
+        function timeToMinutes(time) {
+            const [hours, minutes] = time.split(':').map(Number);
+            return hours * 60 + minutes;
         }
     </script>
 </body>
