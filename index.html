@@ -61,26 +61,104 @@
             }
         }
     </style>
+    <style>
+        /* Существующие стили... */
+    
+        select, button {
+            font-size: 16px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            transition: all 0.3s ease;
+        }
+    
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+            background-repeat: no-repeat;
+            background-position-x: 95%;
+            background-position-y: 50%;
+            padding-right: 30px;
+        }
+    
+        select:hover, button:hover {
+            border-color: #888;
+        }
+    
+        select:focus, button:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+    
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+    
+        button:hover {
+            background-color: #45a049;
+        }
+    
+        button:active {
+            background-color: #3e8e41;
+        }
+    
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+    
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 300px;
+        }
+    
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+    
+        @media only screen and (max-width: 768px) {
+            select, button {
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+        }
+    </style>
 </head>
 <body>
     <h1>Графік відключень електроенергії</h1>
     <div class="form-container">
-        <label for="queue">Виберіть номер черги:</label>
-        <select id="queue">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-        </select>
-        <br><br>
-        <label for="schedule">Виберіть графік відключень:</label>
-        <select id="schedule">
-            <option value="-2+4">-2/+4</option>
-            <option value="-2+10">-2/+10</option>
-        </select>
-        <br><br>
+        <div class="form-group">
+            <label for="queue">Виберіть номер черги:</label>
+            <select id="queue">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="schedule">Виберіть графік відключень:</label>
+            <select id="schedule">
+                <option value="-2+4">-2/+4</option>
+                <option value="-2+10">-2/+10</option>
+            </select>
+        </div>
         <button onclick="generateSchedule()">Показати графік</button>
     </div>
 
