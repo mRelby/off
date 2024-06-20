@@ -82,11 +82,12 @@
     <script>
         const scheduleData = {
             '-2+4': [
-                ["00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 24:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00"],                ["02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 00:00"],
-                ["04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 00:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00"],
-                ["00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 00:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00"],
-                ["02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 00:00"],
-                ["04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 00:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00"]
+                ["00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 24:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00"],                
+                ["02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 24:00"],
+                ["04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 24:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00"],
+                ["00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 24:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00"],
+                ["02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 24:00"],
+                ["04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 24:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00"]
             ],
             '-2+10': [
                 ["00:00 - 02:00\n\n12:00 - 14:00", "04:00 - 06:00\n\n16:00 - 18:00", "02:00 - 04:00\n\n14:00 - 16:00", "06:00 - 08:00\n\n18:00 - 20:00", "10:00 - 12:00\n\n20:00 - 22:00", "08:00 - 10:00\n\n22:00 - 00:00"],
@@ -158,17 +159,34 @@
             let timeUntilNextOutage = Infinity;
 
             for (let range of timeRanges) {
-                if (currentTime >= range.start && currentTime < range.end) {
-                    // Мы находимся в периоде отключения
-                    const timeLeft = range.end - currentTime;
-                    document.getElementById('countdown').innerHTML = `До включення:<br><span class="countdown-time">${Math.floor(timeLeft / 60)}г ${timeLeft % 60}хв</span>`;
-                    setTimeout(() => updateCountdown(queue, schedule), 60000);
-                    return;
-                } else if (currentTime < range.start) {
-                    const timeUntil = range.start - currentTime;
-                    if (timeUntil < timeUntilNextOutage) {
-                        timeUntilNextOutage = timeUntil;
-                        nextOutage = range;
+                if (range.end < range.start) { // handle ranges that span midnight
+                    if (currentTime >= range.start || currentTime < range.end) {
+                        const timeLeft = currentTime >= range.start ? (range.end + 1440) - currentTime : range.end - currentTime;
+                        document.getElementById('countdown').innerHTML = `До включення:<br><span class="countdown-time">${Math.floor(timeLeft / 60)}г ${timeLeft % 60}хв</span>`;
+                        setTimeout(() => updateCountdown(queue, schedule), 60000);
+                        return;
+                    } else {
+                        const timeUntil = range.start - currentTime;
+                        if (timeUntil < 0) {
+                            timeUntil += 1440; // add a day in minutes if timeUntil is negative
+                        }
+                        if (timeUntil < timeUntilNextOutage) {
+                            timeUntilNextOutage = timeUntil;
+                            nextOutage = range;
+                        }
+                    }
+                } else {
+                    if (currentTime >= range.start && currentTime < range.end) {
+                        const timeLeft = range.end - currentTime;
+                        document.getElementById('countdown').innerHTML = `До включення:<br><span class="countdown-time">${Math.floor(timeLeft / 60)}г ${timeLeft % 60}хв</span>`;
+                        setTimeout(() => updateCountdown(queue, schedule), 60000);
+                        return;
+                    } else if (currentTime < range.start) {
+                        const timeUntil = range.start - currentTime;
+                        if (timeUntil < timeUntilNextOutage) {
+                            timeUntilNextOutage = timeUntil;
+                            nextOutage = range;
+                        }
                     }
                 }
             }
