@@ -17,39 +17,44 @@
             margin-bottom: 20px;
         }
         .calendar {
-            width: 100%;
-            border-collapse: collapse;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            max-width: 1200px;
             margin: 0 auto;
-            max-width: 600px;
         }
-        .calendar th, .calendar td {
+        .calendar-day {
             border: 1px solid #ddd;
             padding: 10px;
             text-align: left;
-            vertical-align: top;
+            background-color: #F5F5F5;
         }
-        .calendar td.current-day {
+        .calendar-day.current-day {
             background-color: #FFF5F5;
         }
-        .calendar td.other-days {
-            background-color: #F5F5F5;
-            opacity: 0.25;
-        }
-        .calendar td span.day {
+        .day-number {
             font-weight: bold;
+            margin-bottom: 5px;
         }
         .countdown-time {
             font-weight: bold;
             color: #186647;
         }
 
-        @media only screen and (max-width: 600px) {
+        @media only screen and (max-width: 768px) {
             .form-container {
                 text-align: center;
                 margin-bottom: 10px;
             }
             .calendar {
-                font-size: 14px;
+                grid-template-columns: 1fr;
+            }
+            .calendar-day {
+                font-size: 16px;
+                padding: 15px;
+            }
+            .day-number {
+                font-size: 18px;
             }
         }
     </style>
@@ -110,28 +115,23 @@
             const scheduleTimes = scheduleData[schedule][queue - 1];
             const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
 
-            let calendarHTML = '<table class="calendar">';
-            calendarHTML += '<tr>';
+            let calendarHTML = '<div class="calendar">';
 
             for (let day = 1; day <= daysInMonth; day++) {
                 const timeIndex = (day - 1) % scheduleTimes.length;
                 const isCurrentDay = (day === currentDay);
-                const cellClass = isCurrentDay ? 'current-day' : 'other-days';
+                const cellClass = isCurrentDay ? 'calendar-day current-day' : 'calendar-day';
 
-                let cellContent = `<span class="day">${day}.${currentMonth.toString().padStart(2, '0')}</span><br><br>${scheduleTimes[timeIndex].replace(/\n/g, '<br>')}`;
+                let cellContent = `<div class="day-number">${day}.${currentMonth.toString().padStart(2, '0')}</div>${scheduleTimes[timeIndex].replace(/\n/g, '<br>')}`;
 
                 if (isCurrentDay) {
-                    cellContent += '<br><br><div id="countdown"></div>';
+                    cellContent += '<div id="countdown"></div>';
                 }
 
-                calendarHTML += `<td class="${cellClass}">${cellContent}</td>`;
-
-                if (day % 7 === 0) {
-                    calendarHTML += '</tr><tr>';
-                }
+                calendarHTML += `<div class="${cellClass}">${cellContent}</div>`;
             }
 
-            calendarHTML += '</tr></table>';
+            calendarHTML += '</div>';
             calendarContainer.innerHTML = calendarHTML;
 
             if (document.getElementById('countdown')) {
@@ -149,10 +149,8 @@
             let currentOutage = null;
             let isNextDay = false;
 
-            // Проверка текущего дня
             [currentOutage, nextOutage, timeUntilNextOutage] = checkOutages(timeRanges, currentTime);
 
-            // Если нет отключений сегодня, проверяем следующий день
             if (!currentOutage && !nextOutage) {
                 const tomorrow = new Date(now);
                 tomorrow.setDate(tomorrow.getDate() + 1);
@@ -179,7 +177,7 @@
             let currentOutage = null;
 
             for (let range of timeRanges) {
-                if (range.end < range.start) { // handle ranges that span midnight
+                if (range.end < range.start) {
                     if (currentTime >= range.start || currentTime < range.end) {
                         currentOutage = range;
                         break;
@@ -215,10 +213,10 @@
             function update() {
                 const now = new Date();
                 let currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-                let timeLeft = (targetTime * 60 - currentTime + 86400) % 86400; // в секундах
+                let timeLeft = (targetTime * 60 - currentTime + 86400) % 86400;
 
                 if (isNextDay) {
-                    timeLeft += 86400; // добавляем 24 часа, если это следующий день
+                    timeLeft += 86400;
                 }
 
                 if (timeLeft > 0) {
