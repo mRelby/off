@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Графік відключень</title>
     <style>
+        html, body {
+            scroll-behavior: smooth;
+        }
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -107,35 +110,44 @@
             const queue = document.getElementById('queue').value;
             const schedule = document.getElementById('schedule').value;
             const calendarContainer = document.getElementById('calendar-container');
-
+        
             const today = new Date();
             const currentDay = today.getDate();
             const currentMonth = today.getMonth() + 1;
-
+        
             const scheduleTimes = scheduleData[schedule][queue - 1];
             const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-
+        
             let calendarHTML = '<div class="calendar">';
-
+        
             for (let day = 1; day <= daysInMonth; day++) {
                 const timeIndex = (day - 1) % scheduleTimes.length;
                 const isCurrentDay = (day === currentDay);
                 const cellClass = isCurrentDay ? 'calendar-day current-day' : 'calendar-day';
-
+        
                 let cellContent = `<div class="day-number">${day}.${currentMonth.toString().padStart(2, '0')}</div>${scheduleTimes[timeIndex].replace(/\n/g, '<br>')}`;
-
+        
                 if (isCurrentDay) {
                     cellContent += '<div id="countdown"></div>';
                 }
-
-                calendarHTML += `<div class="${cellClass}">${cellContent}</div>`;
+        
+                calendarHTML += `<div id="${isCurrentDay ? 'current-day-cell' : ''}" class="${cellClass}">${cellContent}</div>`;
             }
-
+        
             calendarHTML += '</div>';
             calendarContainer.innerHTML = calendarHTML;
-
+        
             if (document.getElementById('countdown')) {
                 updateCountdown(queue, schedule);
+            }
+        
+            if (document.getElementById('current-day-cell')) {
+                setTimeout(() => {
+                    document.getElementById('current-day-cell').scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }, 100);
             }
         }
 
@@ -239,4 +251,5 @@
         }
     </script>
 </body>
-</html>
+</html></html>
+
