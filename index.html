@@ -17,6 +17,19 @@
             --button-active: #3e8e41;
             --select-background: #ffffff;
         }
+        
+        [data-theme="dark"] {
+            --background-color: #1a1a1a;
+            --text-color: #ffffff;
+            --border-color: #444;
+            --calendar-background: #2a2a2a;
+            --current-day-background: #3a3a3a;
+            --countdown-color: #4CAF50;
+            --button-background: #4CAF50;
+            --button-hover: #45a049;
+            --button-active: #3e8e41;
+            --select-background: #2a2a2a;
+        }
     
         @media (prefers-color-scheme: dark) {
             :root {
@@ -182,9 +195,63 @@
                 padding: 8px 12px;
             }
         }
+        
+        
+        
+        .scroll-top-btn:focus, .theme-toggle-btn:focus {
+          outline: none;
+          box-shadow: none;
+      }
+        
+        
+        .scroll-top-btn, .theme-toggle-btn {
+            position: fixed;
+            font-size: 30px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            z-index: 1000;
+            padding: 0;
+            margin: 0;
+            width: auto;
+            height: auto;
+        }
+        
+        .scroll-top-btn:hover, .theme-toggle-btn:hover {
+            opacity: 1;
+        }
+        
+        .scroll-top-btn {
+            bottom: 20px;
+            right: 20px;
+            display: none;
+        }
+        
+        .theme-toggle-btn {
+            bottom: 20px;
+            left: 20px;
+            display: none; /* Добавьте эту строку */
+        }
+        
+        /* Переопределение стилей для этих конкретных кнопок */
+        body > .scroll-top-btn, body > .theme-toggle-btn {
+            position: fixed;
+            width: auto;
+            font-size: 30px;
+            padding: 0;
+            background: none;
+            border: none;
+        }
     </style>
+    
 </head>
 <body>
+    
+    <button class="theme-toggle-btn" id="themeToggle">🌗</button>
+    <button class="scroll-top-btn" id="scrollTopBtn">⚡</button>
+    
     <h1>Графік відключень електроенергії</h1>
     <div class="form-container">
         <div class="form-group">
@@ -373,6 +440,64 @@
             const [hours, minutes] = time.split(':').map(Number);
             return hours * 60 + minutes;
         }
+        
+        
+        // ... (существующий JavaScript код остается без изменений) ...
+
+        // Добавляем новый код для кнопок
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+        const themeToggleBtn = document.getElementById('themeToggle');
+
+        // Функция для прокрутки наверх
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Показываем/скрываем кнопку прокрутки наверх
+        window.onscroll = function() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                scrollTopBtn.style.display = "block";
+                themeToggleBtn.style.display = "block"; // Добавьте эту строку
+            } else {
+                scrollTopBtn.style.display = "none";
+                themeToggleBtn.style.display = "none"; // Добавьте эту строку
+            }
+        };
+        // Обработчик клика для кнопки прокрутки наверх
+        scrollTopBtn.onclick = scrollToTop;
+
+        // Функция для переключения темы
+        function toggleTheme() {
+            if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                themeToggleBtn.textContent = '🌗';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeToggleBtn.textContent = '🌓';
+            }
+        }
+
+        // Обработчик клика для кнопки переключения темы
+        themeToggleBtn.onclick = toggleTheme;
+
+        // Устанавливаем начальную тему на основе системных настроек
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeToggleBtn.textContent = '🌓';
+        }
+        
+        // Проверяем положение прокрутки при загрузке страницы
+        window.onload = function() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                scrollTopBtn.style.display = "block";
+                themeToggleBtn.style.display = "block";
+            }
+        };
+        
     </script>
+    
 </body>
 </html></html>
