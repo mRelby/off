@@ -387,14 +387,17 @@
 
             function update() {
                 const now = new Date();
-                let currentTime = now.getHours() * 60 + now.getMinutes();
-                let timeLeft = isNextDay ? (targetTime + 1440 - currentTime) : (targetTime - currentTime + 1440) % 1440;
+                let currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds(); // Текущее время в секундах
+                let targetSeconds = targetTime * 60; // Целевое время в секундах
+
+                let timeLeft = isNextDay ? (targetSeconds + 86400 - currentTime) : (targetSeconds - currentTime + 86400) % 86400; // Оставшееся время в секундах
 
                 if (timeLeft > 0) {
-                    const hours = Math.floor(timeLeft / 60);
-                    const minutes = timeLeft % 60;
-                    countdownElement.innerHTML = `${message}${isNextDay ? ' (завтра)' : ''}:<br><span class="countdown-time">${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}</span>`;
-                    setTimeout(update, 60000); // Update every minute
+                    const hours = Math.floor(timeLeft / 3600);
+                    const minutes = Math.floor((timeLeft % 3600) / 60);
+                    const seconds = timeLeft % 60;
+                    countdownElement.innerHTML = `${message}${isNextDay ? ' (завтра)' : ''}:<br><span class="countdown-time">${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}</span>`;
+                    setTimeout(update, 1000); // Обновление каждую секунду
                 } else {
                     updateCountdown(document.getElementById('queue').value, document.getElementById('schedule').value);
                 }
@@ -402,6 +405,7 @@
 
             update();
         }
+
 
         function timeToMinutes(time) {
             const [hours, minutes] = time.split(':').map(Number);
