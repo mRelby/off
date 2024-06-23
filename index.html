@@ -18,19 +18,6 @@
             --select-background: #ffffff;
         }
         
-        [data-theme="dark"] {
-            --background-color: #1a1a1a;
-            --text-color: #ffffff;
-            --border-color: #444;
-            --calendar-background: #2a2a2a;
-            --current-day-background: #3a3a3a;
-            --countdown-color: #4CAF50;
-            --button-background: #4CAF50;
-            --button-hover: #45a049;
-            --button-active: #3e8e41;
-            --select-background: #2a2a2a;
-        }
-    
         @media (prefers-color-scheme: dark) {
             :root {
                 --background-color: #1a1a1a;
@@ -68,7 +55,7 @@
     
         .calendar {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             max-width: 1200px;
             margin: 0 auto;
@@ -89,11 +76,11 @@
     
         .day-number {
             font-weight: bold;
-            margin-bottom: 10px; /* Увеличенный отступ под датой */
+            margin-bottom: 10px;
         }
     
         .countdown-container {
-            margin-top: 10px; /* Отступ перед уведомлением или таймером */
+            margin-top: 10px;
         }
     
         .countdown-time {
@@ -195,63 +182,10 @@
                 padding: 8px 12px;
             }
         }
-        
-        
-        
-        .scroll-top-btn:focus, .theme-toggle-btn:focus {
-          outline: none;
-          box-shadow: none;
-      }
-        
-        
-        .scroll-top-btn, .theme-toggle-btn {
-            position: fixed;
-            font-size: 30px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            opacity: 0.7;
-            transition: opacity 0.3s;
-            z-index: 1000;
-            padding: 0;
-            margin: 0;
-            width: auto;
-            height: auto;
-        }
-        
-        .scroll-top-btn:hover, .theme-toggle-btn:hover {
-            opacity: 1;
-        }
-        
-        .scroll-top-btn {
-            bottom: 20px;
-            right: 20px;
-            display: none;
-        }
-        
-        .theme-toggle-btn {
-            bottom: 20px;
-            left: 20px;
-            display: none; /* Добавьте эту строку */
-        }
-        
-        /* Переопределение стилей для этих конкретных кнопок */
-        body > .scroll-top-btn, body > .theme-toggle-btn {
-            position: fixed;
-            width: auto;
-            font-size: 30px;
-            padding: 0;
-            background: none;
-            border: none;
-        }
     </style>
     
 </head>
 <body>
-    
-    <button class="theme-toggle-btn" id="themeToggle">🌗</button>
-    <button class="scroll-top-btn" id="scrollTopBtn">⚡</button>
-    
     <h1>Графік відключень електроенергії</h1>
     <div class="form-container">
         <div class="form-group">
@@ -265,6 +199,7 @@
                 <option value="6">6</option>
             </select>
         </div>
+
         <div class="form-group">
             <label for="schedule">Виберіть графік відключень:</label>
             <select id="schedule">
@@ -272,7 +207,17 @@
                 <option value="-2+10">-2/+10</option>
             </select>
         </div>
+        
+        <div class="form-group">
+            <label for="view">Виберіть вид:</label>
+            <select id="view">
+                <option value="compact">Компакт</option>
+                <option value="standard">Стандарт</option>
+            </select>
+        </div>
+
         <button onclick="generateSchedule()">Показати графік</button>
+
     </div>
 
     <div id="calendar-container"></div>
@@ -300,38 +245,61 @@
         function generateSchedule() {
             const queue = document.getElementById('queue').value;
             const schedule = document.getElementById('schedule').value;
+            const view = document.getElementById('view').value;
             const calendarContainer = document.getElementById('calendar-container');
-        
+
             const today = new Date();
             const currentDay = today.getDate();
             const currentMonth = today.getMonth() + 1;
-        
+            const currentYear = today.getFullYear();
+
             const scheduleTimes = scheduleData[schedule][queue - 1];
-            const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-        
-            let calendarHTML = '<div class="calendar">';
-        
-            for (let day = 1; day <= daysInMonth; day++) {
-                const timeIndex = (day - 1) % scheduleTimes.length;
-                const isCurrentDay = (day === currentDay);
-                const cellClass = isCurrentDay ? 'calendar-day current-day' : 'calendar-day';
-        
-                let cellContent = `<div class="day-number">${day}.${currentMonth.toString().padStart(2, '0')}</div>${scheduleTimes[timeIndex].replace(/\n/g, '<br>')}`;
-        
-                if (isCurrentDay) {
-                    cellContent += '<div class="countdown-container" id="countdown"></div>';
+            const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+            let calendarHTML = `<div class="calendar ${view}">`;
+
+            if (view === 'compact') {
+                // Компактный вид (вчера, сегодня, завтра)
+                for (let i = -1; i <= 1; i++) {
+                    const day = new Date(currentYear, currentMonth - 1, currentDay + i);
+                    const dayNumber = day.getDate();
+                    const monthNumber = day.getMonth() + 1;
+                    const timeIndex = (dayNumber - 1) % scheduleTimes.length;
+                    const isCurrentDay = (i === 0);
+                    const cellClass = isCurrentDay ? 'calendar-day current-day' : 'calendar-day';
+
+                    let cellContent = `<div class="day-number">${dayNumber}.${monthNumber.toString().padStart(2, '0')}</div>${scheduleTimes[timeIndex].replace(/\n/g, '<br>')}`;
+
+                    if (isCurrentDay) {
+                        cellContent += '<div class="countdown-container" id="countdown"></div>';
+                    }
+
+                    calendarHTML += `<div id="${isCurrentDay ? 'current-day-cell' : ''}" class="${cellClass}">${cellContent}</div>`;
                 }
-        
-                calendarHTML += `<div id="${isCurrentDay ? 'current-day-cell' : ''}" class="${cellClass}">${cellContent}</div>`;
+            } else {
+                // Стандартный вид (полный месяц)
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const timeIndex = (day - 1) % scheduleTimes.length;
+                    const isCurrentDay = (day === currentDay);
+                    const cellClass = isCurrentDay ? 'calendar-day current-day' : 'calendar-day';
+
+                    let cellContent = `<div class="day-number">${day}.${currentMonth.toString().padStart(2, '0')}</div>${scheduleTimes[timeIndex].replace(/\n/g, '<br>')}`;
+
+                    if (isCurrentDay) {
+                        cellContent += '<div class="countdown-container" id="countdown"></div>';
+                    }
+
+                    calendarHTML += `<div id="${isCurrentDay ? 'current-day-cell' : ''}" class="${cellClass}">${cellContent}</div>`;
+                }
             }
-        
+
             calendarHTML += '</div>';
             calendarContainer.innerHTML = calendarHTML;
-        
+
             if (document.getElementById('countdown')) {
                 updateCountdown(queue, schedule);
             }
-        
+
             if (document.getElementById('current-day-cell')) {
                 setTimeout(() => {
                     document.getElementById('current-day-cell').scrollIntoView({
@@ -345,23 +313,17 @@
         function updateCountdown(queue, schedule) {
             const now = new Date();
             let currentTime = now.getHours() * 60 + now.getMinutes();
-            let todaySchedule = scheduleData[schedule][queue - 1][(now.getDate() - 1) % scheduleData[schedule][queue - 1].length];
+            let dayIndex = (now.getDate() - 1) % scheduleData[schedule][queue - 1].length;
+            let todaySchedule = scheduleData[schedule][queue - 1][dayIndex];
+            let tomorrowSchedule = scheduleData[schedule][queue - 1][(dayIndex + 1) % scheduleData[schedule][queue - 1].length];
             let timeRanges = getTimeRanges(todaySchedule);
+            let tomorrowTimeRanges = getTimeRanges(tomorrowSchedule);
             let nextOutage = null;
             let timeUntilNextOutage = Infinity;
             let currentOutage = null;
             let isNextDay = false;
 
-            [currentOutage, nextOutage, timeUntilNextOutage] = checkOutages(timeRanges, currentTime);
-
-            if (!currentOutage && !nextOutage) {
-                const tomorrow = new Date(now);
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                todaySchedule = scheduleData[schedule][queue - 1][(tomorrow.getDate() - 1) % scheduleData[schedule][queue - 1].length];
-                timeRanges = getTimeRanges(todaySchedule);
-                [, nextOutage, timeUntilNextOutage] = checkOutages(timeRanges, 0);
-                isNextDay = true;
-            }
+            [currentOutage, nextOutage, timeUntilNextOutage, isNextDay] = checkOutages(timeRanges, tomorrowTimeRanges, currentTime);
 
             const countdownElement = document.getElementById('countdown');
 
@@ -374,30 +336,40 @@
             }
         }
 
-        function checkOutages(timeRanges, currentTime) {
+        function checkOutages(todayRanges, tomorrowRanges, currentTime) {
             let nextOutage = null;
             let timeUntilNextOutage = Infinity;
             let currentOutage = null;
+            let isNextDay = false;
 
-            for (let range of timeRanges) {
-                if (range.end < range.start) {
-                    if (currentTime >= range.start || currentTime < range.end) {
-                        currentOutage = range;
-                        break;
-                    }
-                } else if (currentTime >= range.start && currentTime < range.end) {
+            // Check today's outages
+            for (let range of todayRanges) {
+                if (currentTime >= range.start && currentTime < range.end) {
                     currentOutage = range;
                     break;
                 }
-
-                const timeUntil = (range.start - currentTime + 1440) % 1440;
-                if (timeUntil < timeUntilNextOutage) {
-                    timeUntilNextOutage = timeUntil;
-                    nextOutage = range;
+                if (currentTime < range.start) {
+                    const timeUntil = range.start - currentTime;
+                    if (timeUntil < timeUntilNextOutage) {
+                        timeUntilNextOutage = timeUntil;
+                        nextOutage = range;
+                    }
                 }
             }
 
-            return [currentOutage, nextOutage, timeUntilNextOutage];
+            // If no current outage and no next outage today, check tomorrow
+            if (!currentOutage && !nextOutage) {
+                for (let range of tomorrowRanges) {
+                    const timeUntil = range.start + 1440 - currentTime;
+                    if (timeUntil < timeUntilNextOutage) {
+                        timeUntilNextOutage = timeUntil;
+                        nextOutage = range;
+                        isNextDay = true;
+                    }
+                }
+            }
+
+            return [currentOutage, nextOutage, timeUntilNextOutage, isNextDay];
         }
 
         function getTimeRanges(schedule) {
@@ -415,19 +387,14 @@
 
             function update() {
                 const now = new Date();
-                let currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-                let timeLeft = (targetTime * 60 - currentTime + 86400) % 86400;
-
-                if (isNextDay) {
-                    timeLeft += 86400;
-                }
+                let currentTime = now.getHours() * 60 + now.getMinutes();
+                let timeLeft = isNextDay ? (targetTime + 1440 - currentTime) : (targetTime - currentTime + 1440) % 1440;
 
                 if (timeLeft > 0) {
-                    const hours = Math.floor(timeLeft / 3600);
-                    const minutes = Math.floor((timeLeft % 3600) / 60);
-                    const seconds = timeLeft % 60;
-                    countdownElement.innerHTML = `${message}${isNextDay ? ' (завтра)' : ''}:<br><span class="countdown-time">${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}</span>`;
-                    setTimeout(update, 1000);
+                    const hours = Math.floor(timeLeft / 60);
+                    const minutes = timeLeft % 60;
+                    countdownElement.innerHTML = `${message}${isNextDay ? ' (завтра)' : ''}:<br><span class="countdown-time">${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}</span>`;
+                    setTimeout(update, 60000); // Update every minute
                 } else {
                     updateCountdown(document.getElementById('queue').value, document.getElementById('schedule').value);
                 }
@@ -440,64 +407,7 @@
             const [hours, minutes] = time.split(':').map(Number);
             return hours * 60 + minutes;
         }
-        
-        
-        // ... (существующий JavaScript код остается без изменений) ...
-
-        // Добавляем новый код для кнопок
-        const scrollTopBtn = document.getElementById('scrollTopBtn');
-        const themeToggleBtn = document.getElementById('themeToggle');
-
-        // Функция для прокрутки наверх
-        function scrollToTop() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        }
-
-        // Показываем/скрываем кнопку прокрутки наверх
-        window.onscroll = function() {
-            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-                scrollTopBtn.style.display = "block";
-                themeToggleBtn.style.display = "block"; // Добавьте эту строку
-            } else {
-                scrollTopBtn.style.display = "none";
-                themeToggleBtn.style.display = "none"; // Добавьте эту строку
-            }
-        };
-        // Обработчик клика для кнопки прокрутки наверх
-        scrollTopBtn.onclick = scrollToTop;
-
-        // Функция для переключения темы
-        function toggleTheme() {
-            if (document.documentElement.getAttribute('data-theme') === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'light');
-                themeToggleBtn.textContent = '🌗';
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                themeToggleBtn.textContent = '🌓';
-            }
-        }
-
-        // Обработчик клика для кнопки переключения темы
-        themeToggleBtn.onclick = toggleTheme;
-
-        // Устанавливаем начальную тему на основе системных настроек
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            themeToggleBtn.textContent = '🌓';
-        }
-        
-        // Проверяем положение прокрутки при загрузке страницы
-        window.onload = function() {
-            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-                scrollTopBtn.style.display = "block";
-                themeToggleBtn.style.display = "block";
-            }
-        };
-        
     </script>
     
 </body>
-</html></html>
+</html>
