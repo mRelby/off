@@ -3,31 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Манекен - Упрощенная версия</title>
+    <title>3D Манекен - Редактор Позы</title>
     <style>
-        body {
+        * {
             margin: 0;
-            overflow: hidden;
-            display: flex;
-            font-family: Arial, sans-serif;
+            padding: 0;
+            box-sizing: border-box;
         }
         
-        #scene-container {
+        body {
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            background-color: #f0f0f0;
+        }
+        
+        #container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+        }
+        
+        /* Важно: flex: 1, чтобы контейнер под WebGL занимал оставшееся пространство */
+        #canvas {
             flex: 1;
+            background-color: #eaeaea;
         }
         
         #controls {
             width: 300px;
-            background: white;
-            padding: 15px;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
             overflow-y: auto;
             height: 100vh;
-            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
         }
         
-        h2, h3 {
-            margin-top: 15px;
-            margin-bottom: 10px;
+        h2 {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
         }
         
         .control-group {
@@ -41,183 +55,227 @@
         label {
             display: block;
             margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        input[type="range"] {
+            width: 100%;
         }
         
         button {
-            background: #4285f4;
+            padding: 8px 15px;
+            background-color: #4285f4;
             color: white;
             border: none;
-            padding: 8px 12px;
-            margin: 5px;
             border-radius: 4px;
             cursor: pointer;
+            margin-right: 5px;
+            margin-bottom: 5px;
         }
         
         button:hover {
-            background: #3b78e7;
+            background-color: #3367d6;
+        }
+        
+        .pose-presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div id="scene-container"></div>
-    
-    <div id="controls">
-        <h2>Управление манекеном</h2>
-        
-        <div class="control-group">
-            <h3>Пресеты поз</h3>
-            <button id="reset-pose">По умолчанию</button>
-            <button id="pose-a">Поза A</button>
-            <button id="pose-b">Поза B</button>
-        </div>
-        
-        <div class="control-group">
-            <h3>Голова</h3>
-            <div class="slider-control">
-                <label for="head-y">Поворот головы (лево-право)</label>
-                <input type="range" id="head-y" min="-90" max="90" value="0">
+    <div id="container">
+        <div id="canvas"></div>
+        <div id="controls">
+            <h2>Управление манекеном</h2>
+            
+            <div class="control-group">
+                <h3>Пресеты поз</h3>
+                <div class="pose-presets">
+                    <button id="pose-default">По умолчанию</button>
+                    <button id="pose-a">Поза A</button>
+                    <button id="pose-b">Поза B</button>
+                    <button id="pose-c">Поза C</button>
+                </div>
             </div>
-            <div class="slider-control">
-                <label for="head-x">Наклон головы (вверх-вниз)</label>
-                <input type="range" id="head-x" min="-45" max="45" value="0">
+            
+            <div class="control-group">
+                <h3>Голова</h3>
+                <div class="slider-control">
+                    <label for="head-y">Поворот (лево-право)</label>
+                    <input type="range" id="head-y" min="-50" max="50" value="0">
+                </div>
+                <div class="slider-control">
+                    <label for="head-x">Наклон (вверх-вниз)</label>
+                    <input type="range" id="head-x" min="-50" max="50" value="0">
+                </div>
             </div>
-        </div>
-        
-        <div class="control-group">
-            <h3>Руки</h3>
-            <div class="slider-control">
-                <label for="left-arm-y">Левая рука (подъем)</label>
-                <input type="range" id="left-arm-y" min="-180" max="180" value="0">
+            
+            <div class="control-group">
+                <h3>Руки</h3>
+                <h4>Левая рука</h4>
+                <div class="slider-control">
+                    <label for="left-arm-x">Поднять/опустить</label>
+                    <input type="range" id="left-arm-x" min="-180" max="180" value="0">
+                </div>
+                <div class="slider-control">
+                    <label for="left-arm-z">Вперед/назад</label>
+                    <input type="range" id="left-arm-z" min="-90" max="90" value="0">
+                </div>
+                <div class="slider-control">
+                    <label for="left-elbow">Локоть</label>
+                    <input type="range" id="left-elbow" min="0" max="160" value="0">
+                </div>
+                
+                <h4>Правая рука</h4>
+                <div class="slider-control">
+                    <label for="right-arm-x">Поднять/опустить</label>
+                    <input type="range" id="right-arm-x" min="-180" max="180" value="0">
+                </div>
+                <div class="slider-control">
+                    <label for="right-arm-z">Вперед/назад</label>
+                    <input type="range" id="right-arm-z" min="-90" max="90" value="0">
+                </div>
+                <div class="slider-control">
+                    <label for="right-elbow">Локоть</label>
+                    <input type="range" id="right-elbow" min="0" max="160" value="0">
+                </div>
             </div>
-            <div class="slider-control">
-                <label for="left-elbow">Левый локоть (сгиб)</label>
-                <input type="range" id="left-elbow" min="0" max="160" value="0">
+            
+            <div class="control-group">
+                <h3>Ноги</h3>
+                <h4>Левая нога</h4>
+                <div class="slider-control">
+                    <label for="left-leg-x">Поднять/опустить</label>
+                    <input type="range" id="left-leg-x" min="-90" max="90" value="0">
+                </div>
+                <div class="slider-control">
+                    <label for="left-leg-z">Влево/вправо</label>
+                    <input type="range" id="left-leg-z" min="-45" max="45" value="0">
+                </div>
+                <div class="slider-control">
+                    <label for="left-knee">Колено</label>
+                    <input type="range" id="left-knee" min="0" max="160" value="0">
+                </div>
+                
+                <h4>Правая нога</h4>
+                <div class="slider-control">
+                    <label for="right-leg-x">Поднять/опустить</label>
+                    <input type="range" id="right-leg-x" min="-90" max="90" value="0">
+                </div>
+                <div class="slider-control">
+                    <label for="right-leg-z">Влево/вправо</label>
+                    <input type="range" id="right-leg-z" min="-45" max="45" value="0">
+                </div>
+                <div class="slider-control">
+                    <label for="right-knee">Колено</label>
+                    <input type="range" id="right-knee" min="0" max="160" value="0">
+                </div>
             </div>
-            <div class="slider-control">
-                <label for="right-arm-y">Правая рука (подъем)</label>
-                <input type="range" id="right-arm-y" min="-180" max="180" value="0">
-            </div>
-            <div class="slider-control">
-                <label for="right-elbow">Правый локоть (сгиб)</label>
-                <input type="range" id="right-elbow" min="0" max="160" value="0">
-            </div>
-        </div>
-        
-        <div class="control-group">
-            <h3>Ноги</h3>
-            <div class="slider-control">
-                <label for="left-leg-y">Левая нога (подъем)</label>
-                <input type="range" id="left-leg-y" min="-90" max="90" value="0">
-            </div>
-            <div class="slider-control">
-                <label for="left-knee">Левое колено (сгиб)</label>
-                <input type="range" id="left-knee" min="0" max="160" value="0">
-            </div>
-            <div class="slider-control">
-                <label for="right-leg-y">Правая нога (подъем)</label>
-                <input type="range" id="right-leg-y" min="-90" max="90" value="0">
-            </div>
-            <div class="slider-control">
-                <label for="right-knee">Правое колено (сгиб)</label>
-                <input type="range" id="right-knee" min="0" max="160" value="0">
+            
+            <div class="control-group">
+                <h3>Туловище</h3>
+                <div class="slider-control">
+                    <label for="torso-y">Поворот (лево-право)</label>
+                    <input type="range" id="torso-y" min="-45" max="45" value="0">
+                </div>
+                <div class="slider-control">
+                    <label for="torso-x">Наклон (вперед-назад)</label>
+                    <input type="range" id="torso-x" min="-45" max="45" value="0">
+                </div>
+                <div class="slider-control">
+                    <label for="torso-z">Наклон (влево-вправо)</label>
+                    <input type="range" id="torso-z" min="-45" max="45" value="0">
+                </div>
             </div>
         </div>
     </div>
-
-    <!-- Загрузка последней версии Three.js -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
-
+    
+    <!-- Обратите внимание: обновили ссылки на r135, где есть CapsuleGeometry -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r135/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r135/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.0/gsap.min.js"></script>
     <script>
-        // Основные переменные Three.js
-        let scene, camera, renderer, controls;
+        // Основные переменные
+        let scene, camera, renderer, cameraControls;
+        let mannequin = {};
+        let controls = {};
         
-        // Части манекена
-        let mannequin = {
-            torso: null,
-            head: null,
-            leftArm: null, 
-            leftForearm: null,
-            rightArm: null,
-            rightForearm: null,
-            leftLeg: null,
-            leftCalf: null,
-            rightLeg: null,
-            rightCalf: null
-        };
+        // Цвета для частей тела
+        const BODY_COLOR = 0xd4c4a7;
+        const JOINT_COLOR = 0xb0a090;
         
-        // Цвета
-        const BODY_COLOR = 0x6495ED; // Более яркий синий цвет
-        const JOINT_COLOR = 0x333333;
-        
-        // Инициализация сцены
+        // Инициализация
         function init() {
             // Создание сцены
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0xf0f0f0);
             
             // Создание камеры
-            camera = new THREE.PerspectiveCamera(
-                50, 
-                window.innerWidth / (window.innerHeight), 
-                0.1, 
-                1000
-            );
-            camera.position.set(0, 1.7, 5);
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 1.5, 4);
             camera.lookAt(0, 1, 0);
             
             // Создание рендерера
-            const container = document.getElementById('scene-container');
+            const canvas = document.getElementById('canvas');
             renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setSize(canvas.clientWidth, canvas.clientHeight);
             renderer.shadowMap.enabled = true;
-            container.appendChild(renderer.domElement);
+            canvas.appendChild(renderer.domElement);
             
-            // Добавление орбитальных контролей
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.target.set(0, 1, 0);
-            controls.update();
+            // Настройка управления орбитальной камерой
+            cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
+            cameraControls.enableDamping = true;
+            cameraControls.dampingFactor = 0.05;
+            cameraControls.screenSpacePanning = false;
+            cameraControls.minDistance = 3;
+            cameraControls.maxDistance = 10;
             
-            // Добавление света
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            // Добавление освещения
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             scene.add(ambientLight);
             
             const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(1, 2, 3);
+            directionalLight.position.set(2, 5, 3);
             directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 1024;
+            directionalLight.shadow.mapSize.height = 1024;
             scene.add(directionalLight);
             
-            // Добавление пола
+            // Создание пола
             const floor = new THREE.Mesh(
                 new THREE.PlaneGeometry(10, 10),
-                new THREE.MeshStandardMaterial({ color: 0xeeeeee })
+                new THREE.MeshStandardMaterial({ 
+                    color: 0xcccccc,
+                    roughness: 0.8,
+                    metalness: 0.2
+                })
             );
             floor.rotation.x = -Math.PI / 2;
-            floor.position.y = 0;
+            floor.position.y = -0.01;
             floor.receiveShadow = true;
             scene.add(floor);
             
             // Создание манекена
             createMannequin();
             
-            // Настройка элементов управления
+            // Установка управления
             setupControls();
-            
-            // Обработчик изменения размеров окна
-            window.addEventListener('resize', onWindowResize);
             
             // Запуск анимации
             animate();
             
-            // Добавим вспомогательные оси, чтобы было легче ориентироваться
-            const axesHelper = new THREE.AxesHelper(1);
-            scene.add(axesHelper);
+            // Обработка изменения размера окна
+            window.addEventListener('resize', onWindowResize);
         }
         
         // Создание манекена
         function createMannequin() {
-            // Материалы
+            // Создание материалов
             const bodyMaterial = new THREE.MeshStandardMaterial({
                 color: BODY_COLOR,
                 roughness: 0.5,
@@ -226,355 +284,493 @@
             
             const jointMaterial = new THREE.MeshStandardMaterial({
                 color: JOINT_COLOR,
-                roughness: 0.3,
-                metalness: 0.2
+                roughness: 0.5,
+                metalness: 0.1
             });
             
-            // Создание торса (основа всей фигуры)
+            // Создание грудной клетки (CapsuleGeometry есть в r131+)
             mannequin.torso = new THREE.Group();
-            
-            // Для торса используем Box вместо CapsuleGeometry на всякий случай
-            const torsoMesh = new THREE.Mesh(
-                new THREE.BoxGeometry(0.4, 0.6, 0.2),
-                bodyMaterial
-            );
-            torsoMesh.position.y = 0.3;
+            const torsoGeometry = new THREE.CapsuleGeometry(0.25, 0.5, 4, 8);
+            const torsoMesh = new THREE.Mesh(torsoGeometry, bodyMaterial);
             torsoMesh.castShadow = true;
+            torsoMesh.position.y = 0.25;
             mannequin.torso.add(torsoMesh);
             
-            // Добавляем торс на сцену
-            mannequin.torso.position.y = 1;
+            // Создание бедер
+            const hipsGeometry = new THREE.CapsuleGeometry(0.22, 0.2, 4, 8);
+            const hipsMesh = new THREE.Mesh(hipsGeometry, bodyMaterial);
+            hipsMesh.rotation.x = Math.PI / 2;
+            hipsMesh.position.y = -0.15;
+            hipsMesh.castShadow = true;
+            mannequin.torso.add(hipsMesh);
+            
+            // Добавление торса на сцену
+            mannequin.torso.position.y = 1.1;
             scene.add(mannequin.torso);
             
             // Создание головы
             mannequin.head = new THREE.Group();
-            
-            // Шея (соединение)
-            const neckJoint = new THREE.Mesh(
-                new THREE.SphereGeometry(0.06, 16, 16),
+            const headJoint = new THREE.Mesh(
+                new THREE.SphereGeometry(0.08, 16, 16),
                 jointMaterial
             );
-            mannequin.head.add(neckJoint);
+            mannequin.head.add(headJoint);
             
-            // Голова
-            const headMesh = new THREE.Mesh(
-                new THREE.SphereGeometry(0.15, 24, 24),
-                bodyMaterial
-            );
-            headMesh.position.y = 0.15;
+            const headGeometry = new THREE.SphereGeometry(0.15, 32, 32);
+            const headMesh = new THREE.Mesh(headGeometry, bodyMaterial);
+            headMesh.position.y = 0.16;
             headMesh.castShadow = true;
             mannequin.head.add(headMesh);
             
-            mannequin.head.position.y = 0.6;
+            mannequin.head.position.y = 0.5;
             mannequin.torso.add(mannequin.head);
             
             // Создание левой руки
             mannequin.leftArm = new THREE.Group();
-            
-            // Плечевой сустав
             const leftShoulderJoint = new THREE.Mesh(
                 new THREE.SphereGeometry(0.06, 16, 16),
                 jointMaterial
             );
             mannequin.leftArm.add(leftShoulderJoint);
             
-            // Верхняя часть руки
-            const leftUpperArm = new THREE.Mesh(
-                new THREE.BoxGeometry(0.08, 0.3, 0.08),
-                bodyMaterial
-            );
-            leftUpperArm.position.y = -0.15;
+            const leftUpperArmGeometry = new THREE.CapsuleGeometry(0.05, 0.3, 4, 8);
+            const leftUpperArm = new THREE.Mesh(leftUpperArmGeometry, bodyMaterial);
+            leftUpperArm.position.y = -0.2;
             leftUpperArm.castShadow = true;
             mannequin.leftArm.add(leftUpperArm);
             
-            // Левое предплечье
+            // Создание левого предплечья
             mannequin.leftForearm = new THREE.Group();
-            
-            // Локтевой сустав
             const leftElbowJoint = new THREE.Mesh(
                 new THREE.SphereGeometry(0.05, 16, 16),
                 jointMaterial
             );
             mannequin.leftForearm.add(leftElbowJoint);
             
-            // Предплечье
-            const leftForearmMesh = new THREE.Mesh(
-                new THREE.BoxGeometry(0.07, 0.3, 0.07),
-                bodyMaterial
-            );
-            leftForearmMesh.position.y = -0.15;
+            const leftForearmGeometry = new THREE.CapsuleGeometry(0.04, 0.3, 4, 8);
+            const leftForearmMesh = new THREE.Mesh(leftForearmGeometry, bodyMaterial);
+            leftForearmMesh.position.y = -0.2;
             leftForearmMesh.castShadow = true;
             mannequin.leftForearm.add(leftForearmMesh);
             
-            mannequin.leftForearm.position.y = -0.3;
+            mannequin.leftForearm.position.y = -0.4;
             mannequin.leftArm.add(mannequin.leftForearm);
             
-            mannequin.leftArm.position.set(0.25, 0.5, 0);
+            mannequin.leftArm.position.set(0.28, 0.35, 0);
             mannequin.torso.add(mannequin.leftArm);
             
-            // Создание правой руки (аналогично левой)
+            // Создание правой руки
             mannequin.rightArm = new THREE.Group();
-            
             const rightShoulderJoint = new THREE.Mesh(
                 new THREE.SphereGeometry(0.06, 16, 16),
                 jointMaterial
             );
             mannequin.rightArm.add(rightShoulderJoint);
             
-            const rightUpperArm = new THREE.Mesh(
-                new THREE.BoxGeometry(0.08, 0.3, 0.08),
-                bodyMaterial
-            );
-            rightUpperArm.position.y = -0.15;
+            const rightUpperArmGeometry = new THREE.CapsuleGeometry(0.05, 0.3, 4, 8);
+            const rightUpperArm = new THREE.Mesh(rightUpperArmGeometry, bodyMaterial);
+            rightUpperArm.position.y = -0.2;
             rightUpperArm.castShadow = true;
             mannequin.rightArm.add(rightUpperArm);
             
+            // Создание правого предплечья
             mannequin.rightForearm = new THREE.Group();
-            
             const rightElbowJoint = new THREE.Mesh(
                 new THREE.SphereGeometry(0.05, 16, 16),
                 jointMaterial
             );
             mannequin.rightForearm.add(rightElbowJoint);
             
-            const rightForearmMesh = new THREE.Mesh(
-                new THREE.BoxGeometry(0.07, 0.3, 0.07),
-                bodyMaterial
-            );
-            rightForearmMesh.position.y = -0.15;
+            const rightForearmGeometry = new THREE.CapsuleGeometry(0.04, 0.3, 4, 8);
+            const rightForearmMesh = new THREE.Mesh(rightForearmGeometry, bodyMaterial);
+            rightForearmMesh.position.y = -0.2;
             rightForearmMesh.castShadow = true;
             mannequin.rightForearm.add(rightForearmMesh);
             
-            mannequin.rightForearm.position.y = -0.3;
+            mannequin.rightForearm.position.y = -0.4;
             mannequin.rightArm.add(mannequin.rightForearm);
             
-            mannequin.rightArm.position.set(-0.25, 0.5, 0);
+            mannequin.rightArm.position.set(-0.28, 0.35, 0);
             mannequin.torso.add(mannequin.rightArm);
             
             // Создание левой ноги
             mannequin.leftLeg = new THREE.Group();
-            
             const leftHipJoint = new THREE.Mesh(
                 new THREE.SphereGeometry(0.06, 16, 16),
                 jointMaterial
             );
             mannequin.leftLeg.add(leftHipJoint);
             
-            const leftThigh = new THREE.Mesh(
-                new THREE.BoxGeometry(0.1, 0.35, 0.1),
-                bodyMaterial
-            );
-            leftThigh.position.y = -0.2;
+            const leftThighGeometry = new THREE.CapsuleGeometry(0.06, 0.4, 4, 8);
+            const leftThigh = new THREE.Mesh(leftThighGeometry, bodyMaterial);
+            leftThigh.position.y = -0.25;
             leftThigh.castShadow = true;
             mannequin.leftLeg.add(leftThigh);
             
+            // Создание левой голени
             mannequin.leftCalf = new THREE.Group();
-            
             const leftKneeJoint = new THREE.Mesh(
                 new THREE.SphereGeometry(0.05, 16, 16),
                 jointMaterial
             );
             mannequin.leftCalf.add(leftKneeJoint);
             
-            const leftCalfMesh = new THREE.Mesh(
-                new THREE.BoxGeometry(0.09, 0.35, 0.09),
-                bodyMaterial
-            );
-            leftCalfMesh.position.y = -0.2;
+            const leftCalfGeometry = new THREE.CapsuleGeometry(0.05, 0.4, 4, 8);
+            const leftCalfMesh = new THREE.Mesh(leftCalfGeometry, bodyMaterial);
+            leftCalfMesh.position.y = -0.25;
             leftCalfMesh.castShadow = true;
             mannequin.leftCalf.add(leftCalfMesh);
             
-            mannequin.leftCalf.position.y = -0.4;
+            mannequin.leftCalf.position.y = -0.5;
             mannequin.leftLeg.add(mannequin.leftCalf);
             
             mannequin.leftLeg.position.set(0.1, -0.3, 0);
             mannequin.torso.add(mannequin.leftLeg);
             
-            // Создание правой ноги (аналогично левой)
+            // Создание правой ноги
             mannequin.rightLeg = new THREE.Group();
-            
             const rightHipJoint = new THREE.Mesh(
                 new THREE.SphereGeometry(0.06, 16, 16),
                 jointMaterial
             );
             mannequin.rightLeg.add(rightHipJoint);
             
-            const rightThigh = new THREE.Mesh(
-                new THREE.BoxGeometry(0.1, 0.35, 0.1),
-                bodyMaterial
-            );
-            rightThigh.position.y = -0.2;
+            const rightThighGeometry = new THREE.CapsuleGeometry(0.06, 0.4, 4, 8);
+            const rightThigh = new THREE.Mesh(rightThighGeometry, bodyMaterial);
+            rightThigh.position.y = -0.25;
             rightThigh.castShadow = true;
             mannequin.rightLeg.add(rightThigh);
             
+            // Создание правой голени
             mannequin.rightCalf = new THREE.Group();
-            
             const rightKneeJoint = new THREE.Mesh(
                 new THREE.SphereGeometry(0.05, 16, 16),
                 jointMaterial
             );
             mannequin.rightCalf.add(rightKneeJoint);
             
-            const rightCalfMesh = new THREE.Mesh(
-                new THREE.BoxGeometry(0.09, 0.35, 0.09),
-                bodyMaterial
-            );
-            rightCalfMesh.position.y = -0.2;
+            const rightCalfGeometry = new THREE.CapsuleGeometry(0.05, 0.4, 4, 8);
+            const rightCalfMesh = new THREE.Mesh(rightCalfGeometry, bodyMaterial);
+            rightCalfMesh.position.y = -0.25;
             rightCalfMesh.castShadow = true;
             mannequin.rightCalf.add(rightCalfMesh);
             
-            mannequin.rightCalf.position.y = -0.4;
+            mannequin.rightCalf.position.y = -0.5;
             mannequin.rightLeg.add(mannequin.rightCalf);
             
             mannequin.rightLeg.position.set(-0.1, -0.3, 0);
             mannequin.torso.add(mannequin.rightLeg);
         }
         
-        // Настройка слайдеров управления
+        // Настройка элементов управления
         function setupControls() {
-            // Слайдеры для головы
-            document.getElementById('head-y').addEventListener('input', function() {
-                mannequin.head.rotation.y = THREE.MathUtils.degToRad(this.value);
+            // Голова
+            controls.headY = document.getElementById('head-y');
+            controls.headX = document.getElementById('head-x');
+            
+            controls.headY.addEventListener('input', function() {
+                const value = this.value;
+                mannequin.head.rotation.y = THREE.MathUtils.degToRad(value);
             });
             
-            document.getElementById('head-x').addEventListener('input', function() {
-                mannequin.head.rotation.x = THREE.MathUtils.degToRad(this.value);
+            controls.headX.addEventListener('input', function() {
+                const value = this.value;
+                mannequin.head.rotation.x = THREE.MathUtils.degToRad(value);
             });
             
-            // Слайдеры для рук
-            document.getElementById('left-arm-y').addEventListener('input', function() {
-                mannequin.leftArm.rotation.x = THREE.MathUtils.degToRad(-this.value);
+            // Левая рука
+            controls.leftArmX = document.getElementById('left-arm-x');
+            controls.leftArmZ = document.getElementById('left-arm-z');
+            controls.leftElbow = document.getElementById('left-elbow');
+            
+            controls.leftArmX.addEventListener('input', function() {
+                const value = this.value;
+                mannequin.leftArm.rotation.x = THREE.MathUtils.degToRad(value);
             });
             
-            document.getElementById('left-elbow').addEventListener('input', function() {
-                mannequin.leftForearm.rotation.x = THREE.MathUtils.degToRad(this.value);
+            controls.leftArmZ.addEventListener('input', function() {
+                const value = this.value;
+                mannequin.leftArm.rotation.z = THREE.MathUtils.degToRad(value);
             });
             
-            document.getElementById('right-arm-y').addEventListener('input', function() {
-                mannequin.rightArm.rotation.x = THREE.MathUtils.degToRad(-this.value);
+            controls.leftElbow.addEventListener('input', function() {
+                const value = this.value;
+                mannequin.leftForearm.rotation.x = THREE.MathUtils.degToRad(value);
             });
             
-            document.getElementById('right-elbow').addEventListener('input', function() {
-                mannequin.rightForearm.rotation.x = THREE.MathUtils.degToRad(this.value);
+            // Правая рука
+            controls.rightArmX = document.getElementById('right-arm-x');
+            controls.rightArmZ = document.getElementById('right-arm-z');
+            controls.rightElbow = document.getElementById('right-elbow');
+            
+            controls.rightArmX.addEventListener('input', function() {
+                const value = this.value;
+                mannequin.rightArm.rotation.x = THREE.MathUtils.degToRad(value);
             });
             
-            // Слайдеры для ног
-            document.getElementById('left-leg-y').addEventListener('input', function() {
-                mannequin.leftLeg.rotation.x = THREE.MathUtils.degToRad(this.value);
+            controls.rightArmZ.addEventListener('input', function() {
+                const value = this.value;
+                mannequin.rightArm.rotation.z = -THREE.MathUtils.degToRad(value);
             });
             
-            document.getElementById('left-knee').addEventListener('input', function() {
-                mannequin.leftCalf.rotation.x = THREE.MathUtils.degToRad(this.value);
+            controls.rightElbow.addEventListener('input', function() {
+                const value = this.value;
+                mannequin.rightForearm.rotation.x = THREE.MathUtils.degToRad(value);
             });
             
-            document.getElementById('right-leg-y').addEventListener('input', function() {
-                mannequin.rightLeg.rotation.x = THREE.MathUtils.degToRad(this.value);
+            // Левая нога
+            controls.leftLegX = document.getElementById('left-leg-x');
+            controls.leftLegZ = document.getElementById('left-leg-z');
+            controls.leftKnee = document.getElementById('left-knee');
+            
+            controls.leftLegX.addEventListener('input', function() {
+                const value = this.value;
+                mannequin.leftLeg.rotation.x = THREE.MathUtils.degToRad(value);
             });
             
-            document.getElementById('right-knee').addEventListener('input', function() {
-                mannequin.rightCalf.rotation.x = THREE.MathUtils.degToRad(this.value);
+            controls.leftLegZ.addEventListener('input', function() {
+                const value = this.value;
+                mannequin.leftLeg.rotation.z = THREE.MathUtils.degToRad(value);
             });
             
-            // Кнопки пресетов
-            document.getElementById('reset-pose').addEventListener('click', function() {
+            controls.leftKnee.addEventListener('input', function() {
+                const value = this.value;
+                mannequin.leftCalf.rotation.x = THREE.MathUtils.degToRad(value);
+            });
+            
+            // Правая нога
+            controls.rightLegX = document.getElementById('right-leg-x');
+            controls.rightLegZ = document.getElementById('right-leg-z');
+            controls.rightKnee = document.getElementById('right-knee');
+            
+            controls.rightLegX.addEventListener('input', function() {
+                const value = this.value;
+                mannequin.rightLeg.rotation.x = THREE.MathUtils.degToRad(value);
+            });
+            
+            controls.rightLegZ.addEventListener('input', function() {
+                const value = this.value;
+                mannequin.rightLeg.rotation.z = -THREE.MathUtils.degToRad(value);
+            });
+            
+            controls.rightKnee.addEventListener('input', function() {
+                const value = this.value;
+                mannequin.rightCalf.rotation.x = THREE.MathUtils.degToRad(value);
+            });
+            
+            // Туловище
+            controls.torsoY = document.getElementById('torso-y');
+            controls.torsoX = document.getElementById('torso-x');
+            controls.torsoZ = document.getElementById('torso-z');
+            
+            controls.torsoY.addEventListener('input', function() {
+                const value = this.value;
+                mannequin.torso.rotation.y = THREE.MathUtils.degToRad(value);
+            });
+            
+            controls.torsoX.addEventListener('input', function() {
+                const value = this.value;
+                mannequin.torso.rotation.x = THREE.MathUtils.degToRad(value);
+            });
+            
+            controls.torsoZ.addEventListener('input', function() {
+                const value = this.value;
+                mannequin.torso.rotation.z = THREE.MathUtils.degToRad(value);
+            });
+            
+            // Пресеты поз
+            document.getElementById('pose-default').addEventListener('click', function() {
                 resetPose();
             });
             
             document.getElementById('pose-a').addEventListener('click', function() {
                 applyPose({
-                    headX: 20,
-                    headY: 15,
-                    leftArmY: -45,
-                    leftElbow: 90,
-                    rightArmY: -45,
-                    rightElbow: 90,
-                    leftLegY: 0,
-                    leftKnee: 10,
-                    rightLegY: 0,
-                    rightKnee: 10
+                    torsoY: 0,
+                    torsoX: 0,
+                    torsoZ: 0,
+                    headY: 20,
+                    headX: 0,
+                    leftArmX: -45,
+                    leftArmZ: 20,
+                    leftElbow: 30,
+                    rightArmX: -45,
+                    rightArmZ: 20,
+                    rightElbow: 30,
+                    leftLegX: 0,
+                    leftLegZ: 10,
+                    leftKnee: 0,
+                    rightLegX: 0,
+                    rightLegZ: 10,
+                    rightKnee: 0
                 });
             });
             
             document.getElementById('pose-b').addEventListener('click', function() {
                 applyPose({
+                    torsoY: 10,
+                    torsoX: 5,
+                    torsoZ: 0,
+                    headY: -15,
+                    headX: 10,
+                    leftArmX: 90,
+                    leftArmZ: 0,
+                    leftElbow: 90,
+                    rightArmX: 0,
+                    rightArmZ: 30,
+                    rightElbow: 110,
+                    leftLegX: -10,
+                    leftLegZ: 0,
+                    leftKnee: 20,
+                    rightLegX: 30,
+                    rightLegZ: 0,
+                    rightKnee: 40
+                });
+            });
+            
+            document.getElementById('pose-c').addEventListener('click', function() {
+                applyPose({
+                    torsoY: -10,
+                    torsoX: 0,
+                    torsoZ: 5,
+                    headY: 0,
                     headX: -10,
-                    headY: -30,
-                    leftArmY: -90,
-                    leftElbow: 30,
-                    rightArmY: -180,
-                    rightElbow: 40,
-                    leftLegY: 45,
-                    leftKnee: 90,
-                    rightLegY: 10,
-                    rightKnee: 30
+                    leftArmX: 30,
+                    leftArmZ: 90,
+                    leftElbow: 10,
+                    rightArmX: 160,
+                    rightArmZ: 0,
+                    rightElbow: 30,
+                    leftLegX: 45,
+                    leftLegZ: 0,
+                    leftKnee: 110,
+                    rightLegX: 0,
+                    rightLegZ: 0,
+                    rightKnee: 0
                 });
             });
         }
         
-        // Сброс позы
+        // Сброс позы к позиции по умолчанию
         function resetPose() {
             applyPose({
-                headX: 0,
+                torsoY: 0,
+                torsoX: 0,
+                torsoZ: 0,
                 headY: 0,
-                leftArmY: 0,
+                headX: 0,
+                leftArmX: 0,
+                leftArmZ: 0,
                 leftElbow: 0,
-                rightArmY: 0,
+                rightArmX: 0,
+                rightArmZ: 0,
                 rightElbow: 0,
-                leftLegY: 0,
+                leftLegX: 0,
+                leftLegZ: 0,
                 leftKnee: 0,
-                rightLegY: 0,
+                rightLegX: 0,
+                rightLegZ: 0,
                 rightKnee: 0
             });
         }
         
         // Применение пресета позы
         function applyPose(pose) {
-            // Голова
-            mannequin.head.rotation.x = THREE.MathUtils.degToRad(pose.headX);
-            mannequin.head.rotation.y = THREE.MathUtils.degToRad(pose.headY);
+            // Анимация с помощью GSAP
+            gsap.to(mannequin.torso.rotation, { 
+                x: THREE.MathUtils.degToRad(pose.torsoX), 
+                y: THREE.MathUtils.degToRad(pose.torsoY), 
+                z: THREE.MathUtils.degToRad(pose.torsoZ),
+                duration: 1 
+            });
             
-            // Руки
-            mannequin.leftArm.rotation.x = THREE.MathUtils.degToRad(-pose.leftArmY);
-            mannequin.leftForearm.rotation.x = THREE.MathUtils.degToRad(pose.leftElbow);
-            mannequin.rightArm.rotation.x = THREE.MathUtils.degToRad(-pose.rightArmY);
-            mannequin.rightForearm.rotation.x = THREE.MathUtils.degToRad(pose.rightElbow);
+            gsap.to(mannequin.head.rotation, { 
+                x: THREE.MathUtils.degToRad(pose.headX), 
+                y: THREE.MathUtils.degToRad(pose.headY), 
+                duration: 1 
+            });
             
-            // Ноги
-            mannequin.leftLeg.rotation.x = THREE.MathUtils.degToRad(pose.leftLegY);
-            mannequin.leftCalf.rotation.x = THREE.MathUtils.degToRad(pose.leftKnee);
-            mannequin.rightLeg.rotation.x = THREE.MathUtils.degToRad(pose.rightLegY);
-            mannequin.rightCalf.rotation.x = THREE.MathUtils.degToRad(pose.rightKnee);
+            gsap.to(mannequin.leftArm.rotation, { 
+                x: THREE.MathUtils.degToRad(pose.leftArmX), 
+                z: THREE.MathUtils.degToRad(pose.leftArmZ),
+                duration: 1 
+            });
             
-            // Обновление значений слайдеров
-            document.getElementById('head-x').value = pose.headX;
-            document.getElementById('head-y').value = pose.headY;
-            document.getElementById('left-arm-y').value = pose.leftArmY;
-            document.getElementById('left-elbow').value = pose.leftElbow;
-            document.getElementById('right-arm-y').value = pose.rightArmY;
-            document.getElementById('right-elbow').value = pose.rightElbow;
-            document.getElementById('left-leg-y').value = pose.leftLegY;
-            document.getElementById('left-knee').value = pose.leftKnee;
-            document.getElementById('right-leg-y').value = pose.rightLegY;
-            document.getElementById('right-knee').value = pose.rightKnee;
+            gsap.to(mannequin.leftForearm.rotation, { 
+                x: THREE.MathUtils.degToRad(pose.leftElbow), 
+                duration: 1 
+            });
+            
+            gsap.to(mannequin.rightArm.rotation, { 
+                x: THREE.MathUtils.degToRad(pose.rightArmX), 
+                z: -THREE.MathUtils.degToRad(pose.rightArmZ),
+                duration: 1 
+            });
+            
+            gsap.to(mannequin.rightForearm.rotation, { 
+                x: THREE.MathUtils.degToRad(pose.rightElbow), 
+                duration: 1 
+            });
+            
+            gsap.to(mannequin.leftLeg.rotation, { 
+                x: THREE.MathUtils.degToRad(pose.leftLegX), 
+                z: THREE.MathUtils.degToRad(pose.leftLegZ),
+                duration: 1 
+            });
+            
+            gsap.to(mannequin.leftCalf.rotation, { 
+                x: THREE.MathUtils.degToRad(pose.leftKnee), 
+                duration: 1 
+            });
+            
+            gsap.to(mannequin.rightLeg.rotation, { 
+                x: THREE.MathUtils.degToRad(pose.rightLegX), 
+                z: -THREE.MathUtils.degToRad(pose.rightLegZ),
+                duration: 1 
+            });
+            
+            gsap.to(mannequin.rightCalf.rotation, { 
+                x: THREE.MathUtils.degToRad(pose.rightKnee), 
+                duration: 1 
+            });
+            
+            // Обновление ползунков
+            controls.torsoY.value = pose.torsoY;
+            controls.torsoX.value = pose.torsoX;
+            controls.torsoZ.value = pose.torsoZ;
+            controls.headY.value = pose.headY;
+            controls.headX.value = pose.headX;
+            controls.leftArmX.value = pose.leftArmX;
+            controls.leftArmZ.value = pose.leftArmZ;
+            controls.leftElbow.value = pose.leftElbow;
+            controls.rightArmX.value = pose.rightArmX;
+            controls.rightArmZ.value = pose.rightArmZ;
+            controls.rightElbow.value = pose.rightElbow;
+            controls.leftLegX.value = pose.leftLegX;
+            controls.leftLegZ.value = pose.leftLegZ;
+            controls.leftKnee.value = pose.leftKnee;
+            controls.rightLegX.value = pose.rightLegX;
+            controls.rightLegZ.value = pose.rightLegZ;
+            controls.rightKnee.value = pose.rightKnee;
         }
         
-        // Обработчик изменения размеров окна
+        // Обработка изменения размера окна
         function onWindowResize() {
-            const container = document.getElementById('scene-container');
-            camera.aspect = container.clientWidth / container.clientHeight;
+            const canvas = document.getElementById('canvas');
+            camera.aspect = canvas.clientWidth / canvas.clientHeight;
             camera.updateProjectionMatrix();
-            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+            renderer.render(scene, camera); // Повторный рендеринг сцены
         }
         
         // Анимационный цикл
         function animate() {
             requestAnimationFrame(animate);
-            controls.update();
+            cameraControls.update(); // Обновление орбитальных контролей
             renderer.render(scene, camera);
         }
         
-        // Запускаем инициализацию
-        window.addEventListener('load', init);
+        // Инициализация приложения
+        init();
     </script>
 </body>
 </html>
