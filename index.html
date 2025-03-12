@@ -1,426 +1,580 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Графік відключень</title>
+    <title>3D Манекен - Упрощенная версия</title>
     <style>
-        :root {
-            --background-color: #ffffff;
-            --text-color: #000000;
-            --border-color: #ddd;
-            --calendar-background: #F5F5F5;
-            --current-day-background: #FAFBFF;
-            --countdown-color: #186647;
-            --button-background: #4CAF50;
-            --button-hover: #45a049;
-            --button-active: #3e8e41;
-            --select-background: #ffffff;
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            font-family: Arial, sans-serif;
         }
         
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --background-color: #1a1a1a;
-                --text-color: #ffffff;
-                --border-color: #444;
-                --calendar-background: #2a2a2a;
-                --current-day-background: #3a3a3a;
-                --countdown-color: #4CAF50;
-                --button-background: #4CAF50;
-                --button-hover: #45a049;
-                --button-active: #3e8e41;
-                --select-background: #2a2a2a;
-            }
+        #scene-container {
+            flex: 1;
         }
-    
-        html, body {
-            scroll-behavior: smooth;
+        
+        #controls {
+            width: 300px;
+            background: white;
+            padding: 15px;
+            overflow-y: auto;
+            height: 100vh;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
         }
-    
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: var(--background-color);
-            color: var(--text-color);
-        }
-    
-        h1, h2 {
-            text-align: center;
-        }
-    
-        .form-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-    
-        .calendar {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            max-width: 1200px;
-            margin: 0 auto;
-            border-radius: 3px;
-        }
-    
-        .calendar-day {
-            border: 1px solid var(--border-color);
-            padding: 10px;
-            text-align: left;
-            background-color: var(--calendar-background);
-            border-radius: 3px;
-        }
-    
-        .calendar-day.current-day {
-            background-color: var(--current-day-background);
-        }
-    
-        .day-number {
-            font-weight: bold;
+        
+        h2, h3 {
+            margin-top: 15px;
             margin-bottom: 10px;
         }
-    
-        .countdown-container {
-            margin-top: 10px;
+        
+        .control-group {
+            margin-bottom: 20px;
         }
-    
-        .countdown-time {
-            font-weight: bold;
-            color: var(--countdown-color);
+        
+        .slider-control {
+            margin-bottom: 10px;
         }
-    
-        .form-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 30px;
-            width: 100%;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-    
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            width: 100%;
-        }
-    
-        .form-group label {
+        
+        label {
+            display: block;
             margin-bottom: 5px;
-            font-weight: bold;
         }
-    
-        select, button {
-            width: 100%;
-            font-size: 16px;
-            padding: 10px 15px;
-            border-radius: 3px;
-            border: 1px solid var(--border-color);
-            background-color: var(--select-background);
-            color: var(--text-color);
-            transition: all 0.3s ease;
-        }
-    
-        select {
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-image: url('data:image/svg+xml;utf8,<svg fill="currentColor" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
-            background-repeat: no-repeat;
-            background-position-x: calc(100% - 10px);
-            background-position-y: 50%;
-            padding-right: 35px;
-        }
-    
-        select:hover, button:hover {
-            border-color: var(--button-hover);
-        }
-    
-        select:focus, button:focus {
-            outline: none;
-            border-color: var(--button-background);
-            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
-        }
-    
+        
         button {
-            background-color: var(--button-background);
+            background: #4285f4;
             color: white;
-            cursor: pointer;
             border: none;
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
         }
-    
+        
         button:hover {
-            background-color: var(--button-hover);
-        }
-    
-        button:active {
-            background-color: var(--button-active);
-        }
-    
-        @media only screen and (max-width: 768px) {
-            .form-container {
-                max-width: 90%;
-            }
-    
-            .calendar {
-                grid-template-columns: 1fr;
-            }
-    
-            .calendar-day {
-                font-size: 16px;
-                padding: 15px;
-            }
-    
-            .day-number {
-                font-size: 18px;
-            }
-    
-            select, button {
-                font-size: 14px;
-                padding: 8px 12px;
-            }
+            background: #3b78e7;
         }
     </style>
-    
 </head>
 <body>
-    <h1>Графік відключень електроенергії</h1>
-    <div class="form-container">
-        <div class="form-group">
-            <label for="queue">Виберіть номер черги:</label>
-            <select id="queue">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="schedule">Виберіть графік відключень:</label>
-            <select id="schedule">
-                <option value="-2+10">в обсязі однієї черги (-2/+10)</option>
-                <option value="-2+4">в обсязі двох черг (-2/+4)</option>
-                <option value="-3+3">в обсязі трьох черг (???)</option>
-            </select>
+    <div id="scene-container"></div>
+    
+    <div id="controls">
+        <h2>Управление манекеном</h2>
+        
+        <div class="control-group">
+            <h3>Пресеты поз</h3>
+            <button id="reset-pose">По умолчанию</button>
+            <button id="pose-a">Поза A</button>
+            <button id="pose-b">Поза B</button>
         </div>
         
-        <div class="form-group">
-            <label for="view">Виберіть вид:</label>
-            <select id="view">
-                <option value="compact">Компакт</option>
-                <option value="standard">Стандарт</option>
-            </select>
+        <div class="control-group">
+            <h3>Голова</h3>
+            <div class="slider-control">
+                <label for="head-y">Поворот головы (лево-право)</label>
+                <input type="range" id="head-y" min="-90" max="90" value="0">
+            </div>
+            <div class="slider-control">
+                <label for="head-x">Наклон головы (вверх-вниз)</label>
+                <input type="range" id="head-x" min="-45" max="45" value="0">
+            </div>
         </div>
-
-        <button onclick="generateSchedule()">Показати графік</button>
-
+        
+        <div class="control-group">
+            <h3>Руки</h3>
+            <div class="slider-control">
+                <label for="left-arm-y">Левая рука (подъем)</label>
+                <input type="range" id="left-arm-y" min="-180" max="180" value="0">
+            </div>
+            <div class="slider-control">
+                <label for="left-elbow">Левый локоть (сгиб)</label>
+                <input type="range" id="left-elbow" min="0" max="160" value="0">
+            </div>
+            <div class="slider-control">
+                <label for="right-arm-y">Правая рука (подъем)</label>
+                <input type="range" id="right-arm-y" min="-180" max="180" value="0">
+            </div>
+            <div class="slider-control">
+                <label for="right-elbow">Правый локоть (сгиб)</label>
+                <input type="range" id="right-elbow" min="0" max="160" value="0">
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <h3>Ноги</h3>
+            <div class="slider-control">
+                <label for="left-leg-y">Левая нога (подъем)</label>
+                <input type="range" id="left-leg-y" min="-90" max="90" value="0">
+            </div>
+            <div class="slider-control">
+                <label for="left-knee">Левое колено (сгиб)</label>
+                <input type="range" id="left-knee" min="0" max="160" value="0">
+            </div>
+            <div class="slider-control">
+                <label for="right-leg-y">Правая нога (подъем)</label>
+                <input type="range" id="right-leg-y" min="-90" max="90" value="0">
+            </div>
+            <div class="slider-control">
+                <label for="right-knee">Правое колено (сгиб)</label>
+                <input type="range" id="right-knee" min="0" max="160" value="0">
+            </div>
+        </div>
     </div>
 
-    <div id="calendar-container"></div>
+    <!-- Загрузка последней версии Three.js -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
 
     <script>
-        const scheduleData = {
-            '-2+4': [
-                ["00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 24:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00"],
-                ["02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 24:00"],
-                ["04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 24:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00"],
-                ["00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 24:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00"],
-                ["02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 24:00"],
-                ["04:00 - 06:00\n\n10:00 - 12:00\n\n16:00 - 18:00\n\n22:00 - 24:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n14:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n12:00 - 14:00\n\n18:00 - 20:00"]
-            ],
-            '-2+10': [
-                ["00:00 - 02:00\n\n12:00 - 14:00", "04:00 - 06:00\n\n16:00 - 18:00", "02:00 - 04:00\n\n14:00 - 16:00", "06:00 - 08:00\n\n18:00 - 20:00", "10:00 - 12:00\n\n22:00 - 24:00", "08:00 - 10:00\n\n20:00 - 22:00"],
-                ["02:00 - 04:00\n\n14:00 - 16:00", "00:00 - 02:00\n\n12:00 - 14:00", "04:00 - 06:00\n\n16:00 - 18:00", "08:00 - 10:00\n\n20:00 - 22:00", "06:00 - 08:00\n\n18:00 - 20:00", "10:00 - 12:00\n\n22:00 - 24:00"],
-                ["04:00 - 06:00\n\n16:00 - 18:00", "02:00 - 04:00\n\n14:00 - 16:00", "00:00 - 02:00\n\n12:00 - 14:00", "10:00 - 12:00\n\n22:00 - 24:00", "08:00 - 10:00\n\n20:00 - 22:00", "06:00 - 08:00\n\n18:00 - 20:00"],
-                ["06:00 - 08:00\n\n18:00 - 20:00", "10:00 - 12:00\n\n22:00 - 24:00", "08:00 - 10:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n12:00 - 14:00", "04:00 - 06:00\n\n16:00 - 18:00", "02:00 - 04:00\n\n14:00 - 16:00"],
-                ["08:00 - 10:00\n\n20:00 - 22:00", "06:00 - 08:00\n\n18:00 - 20:00", "10:00 - 12:00\n\n22:00 - 24:00", "02:00 - 04:00\n\n14:00 - 16:00", "00:00 - 02:00\n\n12:00 - 14:00", "04:00 - 06:00\n\n16:00 - 18:00"],
-                ["10:00 - 12:00\n\n22:00 - 24:00", "08:00 - 10:00\n\n20:00 - 22:00", "06:00 - 08:00\n\n18:00 - 20:00", "04:00 - 06:00\n\n16:00 - 18:00", "02:00 - 04:00\n\n14:00 - 16:00", "00:00 - 02:00\n\n12:00 - 14:00"]
-            ],
-            '-3+3': [
-                ["00:00 - 02:00\n\n06:00 - 08:00\n\n10:00 - 14:00\n\n18:00 - 20:00\n\n22:00 - 24:00", "02:00 - 06:00\n\n10:00 - 12:00\n\n14:00 - 18:00\n\n22:00 - 24:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n12:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n04:00 - 08:00\n\n12:00 - 14:00\n\n16:00 - 20:00", "04:00 - 06:00\n\n08:00 - 12:00\n\n16:00 - 18:00\n\n20:00 - 24:00", "02:00 - 04:00\n\n06:00 - 10:00\n\n14:00 - 16:00\n\n18:00 - 22:00"],
-                ["02:00 - 04:00\n\n08:00 - 10:00\n\n12:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n10:00 - 14:00\n\n18:00 - 20:00\n\n22:00 - 24:00", "02:00 - 06:00\n\n10:00 - 12:00\n\n14:00 - 18:00\n\n22:00 - 24:00", "02:00 - 04:00\n\n06:00 - 10:00\n\n14:00 - 16:00\n\n18:00 - 22:00", "00:00 - 02:00\n\n04:00 - 08:00\n\n12:00 - 14:00\n\n16:00 - 20:00", "04:00 - 06:00\n\n08:00 - 12:00\n\n16:00 - 18:00\n\n20:00 - 24:00"],
-                ["02:00 - 06:00\n\n10:00 - 12:00\n\n14:00 - 18:00\n\n22:00 - 24:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n12:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n10:00 - 14:00\n\n18:00 - 20:00\n\n22:00 - 24:00", "04:00 - 06:00\n\n08:00 - 12:00\n\n16:00 - 18:00\n\n20:00 - 24:00", "02:00 - 04:00\n\n06:00 - 10:00\n\n14:00 - 16:00\n\n18:00 - 22:00", "00:00 - 02:00\n\n04:00 - 08:00\n\n12:00 - 14:00\n\n16:00 - 20:00"],
-                ["00:00 - 02:00\n\n04:00 - 08:00\n\n12:00 - 14:00\n\n16:00 - 20:00", "04:00 - 06:00\n\n08:00 - 12:00\n\n16:00 - 18:00\n\n20:00 - 24:00", "02:00 - 04:00\n\n06:00 - 10:00\n\n14:00 - 16:00\n\n18:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n10:00 - 14:00\n\n18:00 - 20:00\n\n22:00 - 24:00", "02:00 - 06:00\n\n10:00 - 12:00\n\n14:00 - 18:00\n\n22:00 - 24:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n12:00 - 16:00\n\n20:00 - 22:00"],
-                ["02:00 - 04:00\n\n06:00 - 10:00\n\n14:00 - 16:00\n\n18:00 - 22:00", "00:00 - 02:00\n\n04:00 - 08:00\n\n12:00 - 14:00\n\n16:00 - 20:00", "04:00 - 06:00\n\n08:00 - 12:00\n\n16:00 - 18:00\n\n20:00 - 24:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n12:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n10:00 - 14:00\n\n18:00 - 20:00\n\n22:00 - 24:00", "02:00 - 06:00\n\n10:00 - 12:00\n\n14:00 - 18:00\n\n22:00 - 24:00"],
-                ["04:00 - 06:00\n\n08:00 - 12:00\n\n16:00 - 18:00\n\n20:00 - 24:00", "02:00 - 04:00\n\n06:00 - 10:00\n\n14:00 - 16:00\n\n18:00 - 22:00", "00:00 - 02:00\n\n04:00 - 08:00\n\n12:00 - 14:00\n\n16:00 - 20:00", "02:00 - 06:00\n\n10:00 - 12:00\n\n14:00 - 18:00\n\n22:00 - 24:00", "02:00 - 04:00\n\n08:00 - 10:00\n\n12:00 - 16:00\n\n20:00 - 22:00", "00:00 - 02:00\n\n06:00 - 08:00\n\n10:00 - 14:00\n\n18:00 - 20:00\n\n22:00 - 24:00"]
-            ]
+        // Основные переменные Three.js
+        let scene, camera, renderer, controls;
+        
+        // Части манекена
+        let mannequin = {
+            torso: null,
+            head: null,
+            leftArm: null, 
+            leftForearm: null,
+            rightArm: null,
+            rightForearm: null,
+            leftLeg: null,
+            leftCalf: null,
+            rightLeg: null,
+            rightCalf: null
         };
-
-        function generateSchedule() {
-            const queue = document.getElementById('queue').value;
-            const schedule = document.getElementById('schedule').value;
-            const view = document.getElementById('view').value;
-            const calendarContainer = document.getElementById('calendar-container');
-
-            const today = new Date();
-            const currentDay = today.getDate();
-            const currentMonth = today.getMonth() + 1;
-            const currentYear = today.getFullYear();
-
-            const scheduleTimes = scheduleData[schedule][queue - 1];
-            const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
-
-            let calendarHTML = `<div class="calendar ${view}">`;
-
-            if (view === 'compact') {
-                // Компактный вид (вчера, сегодня, завтра)
-                for (let i = -1; i <= 1; i++) {
-                    const day = new Date(currentYear, currentMonth - 1, currentDay + i);
-                    const dayNumber = day.getDate();
-                    const monthNumber = day.getMonth() + 1;
-                    const timeIndex = (dayNumber - 1) % scheduleTimes.length;
-                    const isCurrentDay = (i === 0);
-                    const cellClass = isCurrentDay ? 'calendar-day current-day' : 'calendar-day';
-
-                    let cellContent = `<div class="day-number">${dayNumber}.${monthNumber.toString().padStart(2, '0')}</div>${scheduleTimes[timeIndex].replace(/\n/g, '<br>')}`;
-
-                    if (isCurrentDay) {
-                        cellContent += '<div class="countdown-container" id="countdown"></div>';
-                    }
-
-                    calendarHTML += `<div id="${isCurrentDay ? 'current-day-cell' : ''}" class="${cellClass}">${cellContent}</div>`;
-                }
-            } else {
-                // Стандартный вид (полный месяц)
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const timeIndex = (day - 1) % scheduleTimes.length;
-                    const isCurrentDay = (day === currentDay);
-                    const cellClass = isCurrentDay ? 'calendar-day current-day' : 'calendar-day';
-
-                    let cellContent = `<div class="day-number">${day}.${currentMonth.toString().padStart(2, '0')}</div>${scheduleTimes[timeIndex].replace(/\n/g, '<br>')}`;
-
-                    if (isCurrentDay) {
-                        cellContent += '<div class="countdown-container" id="countdown"></div>';
-                    }
-
-                    calendarHTML += `<div id="${isCurrentDay ? 'current-day-cell' : ''}" class="${cellClass}">${cellContent}</div>`;
-                }
-            }
-
-            calendarHTML += '</div>';
-            calendarContainer.innerHTML = calendarHTML;
-
-            if (document.getElementById('countdown')) {
-                updateCountdown(queue, schedule);
-            }
-
-            if (document.getElementById('current-day-cell')) {
-                setTimeout(() => {
-                    document.getElementById('current-day-cell').scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
-                }, 100);
-            }
+        
+        // Цвета
+        const BODY_COLOR = 0x6495ED; // Более яркий синий цвет
+        const JOINT_COLOR = 0x333333;
+        
+        // Инициализация сцены
+        function init() {
+            // Создание сцены
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf0f0f0);
+            
+            // Создание камеры
+            camera = new THREE.PerspectiveCamera(
+                50, 
+                window.innerWidth / (window.innerHeight), 
+                0.1, 
+                1000
+            );
+            camera.position.set(0, 1.7, 5);
+            camera.lookAt(0, 1, 0);
+            
+            // Создание рендерера
+            const container = document.getElementById('scene-container');
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+            
+            // Добавление орбитальных контролей
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.target.set(0, 1, 0);
+            controls.update();
+            
+            // Добавление света
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(1, 2, 3);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            // Добавление пола
+            const floor = new THREE.Mesh(
+                new THREE.PlaneGeometry(10, 10),
+                new THREE.MeshStandardMaterial({ color: 0xeeeeee })
+            );
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = 0;
+            floor.receiveShadow = true;
+            scene.add(floor);
+            
+            // Создание манекена
+            createMannequin();
+            
+            // Настройка элементов управления
+            setupControls();
+            
+            // Обработчик изменения размеров окна
+            window.addEventListener('resize', onWindowResize);
+            
+            // Запуск анимации
+            animate();
+            
+            // Добавим вспомогательные оси, чтобы было легче ориентироваться
+            const axesHelper = new THREE.AxesHelper(1);
+            scene.add(axesHelper);
         }
-
-        function updateCountdown(queue, schedule) {
-            const now = new Date();
-            let currentTime = now.getHours() * 60 + now.getMinutes();
-            let dayIndex = (now.getDate() - 1) % scheduleData[schedule][queue - 1].length;
-            let todaySchedule = scheduleData[schedule][queue - 1][dayIndex];
-            let tomorrowSchedule = scheduleData[schedule][queue - 1][(dayIndex + 1) % scheduleData[schedule][queue - 1].length];
-            let timeRanges = getTimeRanges(todaySchedule);
-            let tomorrowTimeRanges = getTimeRanges(tomorrowSchedule);
-            let nextOutage = null;
-            let timeUntilNextOutage = Infinity;
-            let currentOutage = null;
-            let isNextDay = false;
-
-            [currentOutage, nextOutage, timeUntilNextOutage, isNextDay] = checkOutages(timeRanges, tomorrowTimeRanges, currentTime);
-
-            const countdownElement = document.getElementById('countdown');
-
-            if (currentOutage) {
-                updateTimer(currentOutage.end, 'До включення');
-            } else if (nextOutage) {
-                updateTimer(nextOutage.start, 'До відключення', isNextDay);
-            } else {
-                countdownElement.innerHTML = 'Відключень не очікується';
-            }
+        
+        // Создание манекена
+        function createMannequin() {
+            // Материалы
+            const bodyMaterial = new THREE.MeshStandardMaterial({
+                color: BODY_COLOR,
+                roughness: 0.5,
+                metalness: 0.1
+            });
+            
+            const jointMaterial = new THREE.MeshStandardMaterial({
+                color: JOINT_COLOR,
+                roughness: 0.3,
+                metalness: 0.2
+            });
+            
+            // Создание торса (основа всей фигуры)
+            mannequin.torso = new THREE.Group();
+            
+            // Для торса используем Box вместо CapsuleGeometry на всякий случай
+            const torsoMesh = new THREE.Mesh(
+                new THREE.BoxGeometry(0.4, 0.6, 0.2),
+                bodyMaterial
+            );
+            torsoMesh.position.y = 0.3;
+            torsoMesh.castShadow = true;
+            mannequin.torso.add(torsoMesh);
+            
+            // Добавляем торс на сцену
+            mannequin.torso.position.y = 1;
+            scene.add(mannequin.torso);
+            
+            // Создание головы
+            mannequin.head = new THREE.Group();
+            
+            // Шея (соединение)
+            const neckJoint = new THREE.Mesh(
+                new THREE.SphereGeometry(0.06, 16, 16),
+                jointMaterial
+            );
+            mannequin.head.add(neckJoint);
+            
+            // Голова
+            const headMesh = new THREE.Mesh(
+                new THREE.SphereGeometry(0.15, 24, 24),
+                bodyMaterial
+            );
+            headMesh.position.y = 0.15;
+            headMesh.castShadow = true;
+            mannequin.head.add(headMesh);
+            
+            mannequin.head.position.y = 0.6;
+            mannequin.torso.add(mannequin.head);
+            
+            // Создание левой руки
+            mannequin.leftArm = new THREE.Group();
+            
+            // Плечевой сустав
+            const leftShoulderJoint = new THREE.Mesh(
+                new THREE.SphereGeometry(0.06, 16, 16),
+                jointMaterial
+            );
+            mannequin.leftArm.add(leftShoulderJoint);
+            
+            // Верхняя часть руки
+            const leftUpperArm = new THREE.Mesh(
+                new THREE.BoxGeometry(0.08, 0.3, 0.08),
+                bodyMaterial
+            );
+            leftUpperArm.position.y = -0.15;
+            leftUpperArm.castShadow = true;
+            mannequin.leftArm.add(leftUpperArm);
+            
+            // Левое предплечье
+            mannequin.leftForearm = new THREE.Group();
+            
+            // Локтевой сустав
+            const leftElbowJoint = new THREE.Mesh(
+                new THREE.SphereGeometry(0.05, 16, 16),
+                jointMaterial
+            );
+            mannequin.leftForearm.add(leftElbowJoint);
+            
+            // Предплечье
+            const leftForearmMesh = new THREE.Mesh(
+                new THREE.BoxGeometry(0.07, 0.3, 0.07),
+                bodyMaterial
+            );
+            leftForearmMesh.position.y = -0.15;
+            leftForearmMesh.castShadow = true;
+            mannequin.leftForearm.add(leftForearmMesh);
+            
+            mannequin.leftForearm.position.y = -0.3;
+            mannequin.leftArm.add(mannequin.leftForearm);
+            
+            mannequin.leftArm.position.set(0.25, 0.5, 0);
+            mannequin.torso.add(mannequin.leftArm);
+            
+            // Создание правой руки (аналогично левой)
+            mannequin.rightArm = new THREE.Group();
+            
+            const rightShoulderJoint = new THREE.Mesh(
+                new THREE.SphereGeometry(0.06, 16, 16),
+                jointMaterial
+            );
+            mannequin.rightArm.add(rightShoulderJoint);
+            
+            const rightUpperArm = new THREE.Mesh(
+                new THREE.BoxGeometry(0.08, 0.3, 0.08),
+                bodyMaterial
+            );
+            rightUpperArm.position.y = -0.15;
+            rightUpperArm.castShadow = true;
+            mannequin.rightArm.add(rightUpperArm);
+            
+            mannequin.rightForearm = new THREE.Group();
+            
+            const rightElbowJoint = new THREE.Mesh(
+                new THREE.SphereGeometry(0.05, 16, 16),
+                jointMaterial
+            );
+            mannequin.rightForearm.add(rightElbowJoint);
+            
+            const rightForearmMesh = new THREE.Mesh(
+                new THREE.BoxGeometry(0.07, 0.3, 0.07),
+                bodyMaterial
+            );
+            rightForearmMesh.position.y = -0.15;
+            rightForearmMesh.castShadow = true;
+            mannequin.rightForearm.add(rightForearmMesh);
+            
+            mannequin.rightForearm.position.y = -0.3;
+            mannequin.rightArm.add(mannequin.rightForearm);
+            
+            mannequin.rightArm.position.set(-0.25, 0.5, 0);
+            mannequin.torso.add(mannequin.rightArm);
+            
+            // Создание левой ноги
+            mannequin.leftLeg = new THREE.Group();
+            
+            const leftHipJoint = new THREE.Mesh(
+                new THREE.SphereGeometry(0.06, 16, 16),
+                jointMaterial
+            );
+            mannequin.leftLeg.add(leftHipJoint);
+            
+            const leftThigh = new THREE.Mesh(
+                new THREE.BoxGeometry(0.1, 0.35, 0.1),
+                bodyMaterial
+            );
+            leftThigh.position.y = -0.2;
+            leftThigh.castShadow = true;
+            mannequin.leftLeg.add(leftThigh);
+            
+            mannequin.leftCalf = new THREE.Group();
+            
+            const leftKneeJoint = new THREE.Mesh(
+                new THREE.SphereGeometry(0.05, 16, 16),
+                jointMaterial
+            );
+            mannequin.leftCalf.add(leftKneeJoint);
+            
+            const leftCalfMesh = new THREE.Mesh(
+                new THREE.BoxGeometry(0.09, 0.35, 0.09),
+                bodyMaterial
+            );
+            leftCalfMesh.position.y = -0.2;
+            leftCalfMesh.castShadow = true;
+            mannequin.leftCalf.add(leftCalfMesh);
+            
+            mannequin.leftCalf.position.y = -0.4;
+            mannequin.leftLeg.add(mannequin.leftCalf);
+            
+            mannequin.leftLeg.position.set(0.1, -0.3, 0);
+            mannequin.torso.add(mannequin.leftLeg);
+            
+            // Создание правой ноги (аналогично левой)
+            mannequin.rightLeg = new THREE.Group();
+            
+            const rightHipJoint = new THREE.Mesh(
+                new THREE.SphereGeometry(0.06, 16, 16),
+                jointMaterial
+            );
+            mannequin.rightLeg.add(rightHipJoint);
+            
+            const rightThigh = new THREE.Mesh(
+                new THREE.BoxGeometry(0.1, 0.35, 0.1),
+                bodyMaterial
+            );
+            rightThigh.position.y = -0.2;
+            rightThigh.castShadow = true;
+            mannequin.rightLeg.add(rightThigh);
+            
+            mannequin.rightCalf = new THREE.Group();
+            
+            const rightKneeJoint = new THREE.Mesh(
+                new THREE.SphereGeometry(0.05, 16, 16),
+                jointMaterial
+            );
+            mannequin.rightCalf.add(rightKneeJoint);
+            
+            const rightCalfMesh = new THREE.Mesh(
+                new THREE.BoxGeometry(0.09, 0.35, 0.09),
+                bodyMaterial
+            );
+            rightCalfMesh.position.y = -0.2;
+            rightCalfMesh.castShadow = true;
+            mannequin.rightCalf.add(rightCalfMesh);
+            
+            mannequin.rightCalf.position.y = -0.4;
+            mannequin.rightLeg.add(mannequin.rightCalf);
+            
+            mannequin.rightLeg.position.set(-0.1, -0.3, 0);
+            mannequin.torso.add(mannequin.rightLeg);
         }
-
-        function checkOutages(todayRanges, tomorrowRanges, currentTime) {
-            let nextOutage = null;
-            let timeUntilNextOutage = Infinity;
-            let currentOutage = null;
-            let isNextDay = false;
-
-            // Check today's outages
-            for (let range of todayRanges) {
-                if (currentTime >= range.start && currentTime < range.end) {
-                    currentOutage = range;
-                    break;
-                }
-                if (currentTime < range.start) {
-                    const timeUntil = range.start - currentTime;
-                    if (timeUntil < timeUntilNextOutage) {
-                        timeUntilNextOutage = timeUntil;
-                        nextOutage = range;
-                    }
-                }
-            }
-
-            // If no current outage and no next outage today, check tomorrow
-            if (!currentOutage && !nextOutage) {
-                for (let range of tomorrowRanges) {
-                    const timeUntil = range.start + 1440 - currentTime;
-                    if (timeUntil < timeUntilNextOutage) {
-                        timeUntilNextOutage = timeUntil;
-                        nextOutage = range;
-                        isNextDay = true;
-                    }
-                }
-            }
-
-            return [currentOutage, nextOutage, timeUntilNextOutage, isNextDay];
-        }
-
-        function getTimeRanges(schedule) {
-            return schedule.split('\n\n').map(range => {
-                const [start, end] = range.split(' - ');
-                return {
-                    start: timeToMinutes(start),
-                    end: timeToMinutes(end)
-                };
+        
+        // Настройка слайдеров управления
+        function setupControls() {
+            // Слайдеры для головы
+            document.getElementById('head-y').addEventListener('input', function() {
+                mannequin.head.rotation.y = THREE.MathUtils.degToRad(this.value);
+            });
+            
+            document.getElementById('head-x').addEventListener('input', function() {
+                mannequin.head.rotation.x = THREE.MathUtils.degToRad(this.value);
+            });
+            
+            // Слайдеры для рук
+            document.getElementById('left-arm-y').addEventListener('input', function() {
+                mannequin.leftArm.rotation.x = THREE.MathUtils.degToRad(-this.value);
+            });
+            
+            document.getElementById('left-elbow').addEventListener('input', function() {
+                mannequin.leftForearm.rotation.x = THREE.MathUtils.degToRad(this.value);
+            });
+            
+            document.getElementById('right-arm-y').addEventListener('input', function() {
+                mannequin.rightArm.rotation.x = THREE.MathUtils.degToRad(-this.value);
+            });
+            
+            document.getElementById('right-elbow').addEventListener('input', function() {
+                mannequin.rightForearm.rotation.x = THREE.MathUtils.degToRad(this.value);
+            });
+            
+            // Слайдеры для ног
+            document.getElementById('left-leg-y').addEventListener('input', function() {
+                mannequin.leftLeg.rotation.x = THREE.MathUtils.degToRad(this.value);
+            });
+            
+            document.getElementById('left-knee').addEventListener('input', function() {
+                mannequin.leftCalf.rotation.x = THREE.MathUtils.degToRad(this.value);
+            });
+            
+            document.getElementById('right-leg-y').addEventListener('input', function() {
+                mannequin.rightLeg.rotation.x = THREE.MathUtils.degToRad(this.value);
+            });
+            
+            document.getElementById('right-knee').addEventListener('input', function() {
+                mannequin.rightCalf.rotation.x = THREE.MathUtils.degToRad(this.value);
+            });
+            
+            // Кнопки пресетов
+            document.getElementById('reset-pose').addEventListener('click', function() {
+                resetPose();
+            });
+            
+            document.getElementById('pose-a').addEventListener('click', function() {
+                applyPose({
+                    headX: 20,
+                    headY: 15,
+                    leftArmY: -45,
+                    leftElbow: 90,
+                    rightArmY: -45,
+                    rightElbow: 90,
+                    leftLegY: 0,
+                    leftKnee: 10,
+                    rightLegY: 0,
+                    rightKnee: 10
+                });
+            });
+            
+            document.getElementById('pose-b').addEventListener('click', function() {
+                applyPose({
+                    headX: -10,
+                    headY: -30,
+                    leftArmY: -90,
+                    leftElbow: 30,
+                    rightArmY: -180,
+                    rightElbow: 40,
+                    leftLegY: 45,
+                    leftKnee: 90,
+                    rightLegY: 10,
+                    rightKnee: 30
+                });
             });
         }
-
-        function updateTimer(targetTime, message, isNextDay = false) {
-            const countdownElement = document.getElementById('countdown');
-
-            function update() {
-                const now = new Date();
-                let currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds(); // Текущее время в секундах
-                let targetSeconds = targetTime * 60; // Целевое время в секундах
-
-                let timeLeft = isNextDay ? (targetSeconds + 86400 - currentTime) : (targetSeconds - currentTime + 86400) % 86400; // Оставшееся время в секундах
-
-                if (timeLeft > 0) {
-                    const hours = Math.floor(timeLeft / 3600);
-                    const minutes = Math.floor((timeLeft % 3600) / 60);
-                    const seconds = timeLeft % 60;
-                    countdownElement.innerHTML = `${message}${isNextDay ? ' (завтра)' : ''}:<br><span class="countdown-time">${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}</span>`;
-                    setTimeout(update, 1000); // Обновление каждую секунду
-                } else {
-                    updateCountdown(document.getElementById('queue').value, document.getElementById('schedule').value);
-                }
-            }
-
-            update();
+        
+        // Сброс позы
+        function resetPose() {
+            applyPose({
+                headX: 0,
+                headY: 0,
+                leftArmY: 0,
+                leftElbow: 0,
+                rightArmY: 0,
+                rightElbow: 0,
+                leftLegY: 0,
+                leftKnee: 0,
+                rightLegY: 0,
+                rightKnee: 0
+            });
         }
-
-
-        function timeToMinutes(time) {
-            const [hours, minutes] = time.split(':').map(Number);
-            return hours * 60 + minutes;
+        
+        // Применение пресета позы
+        function applyPose(pose) {
+            // Голова
+            mannequin.head.rotation.x = THREE.MathUtils.degToRad(pose.headX);
+            mannequin.head.rotation.y = THREE.MathUtils.degToRad(pose.headY);
+            
+            // Руки
+            mannequin.leftArm.rotation.x = THREE.MathUtils.degToRad(-pose.leftArmY);
+            mannequin.leftForearm.rotation.x = THREE.MathUtils.degToRad(pose.leftElbow);
+            mannequin.rightArm.rotation.x = THREE.MathUtils.degToRad(-pose.rightArmY);
+            mannequin.rightForearm.rotation.x = THREE.MathUtils.degToRad(pose.rightElbow);
+            
+            // Ноги
+            mannequin.leftLeg.rotation.x = THREE.MathUtils.degToRad(pose.leftLegY);
+            mannequin.leftCalf.rotation.x = THREE.MathUtils.degToRad(pose.leftKnee);
+            mannequin.rightLeg.rotation.x = THREE.MathUtils.degToRad(pose.rightLegY);
+            mannequin.rightCalf.rotation.x = THREE.MathUtils.degToRad(pose.rightKnee);
+            
+            // Обновление значений слайдеров
+            document.getElementById('head-x').value = pose.headX;
+            document.getElementById('head-y').value = pose.headY;
+            document.getElementById('left-arm-y').value = pose.leftArmY;
+            document.getElementById('left-elbow').value = pose.leftElbow;
+            document.getElementById('right-arm-y').value = pose.rightArmY;
+            document.getElementById('right-elbow').value = pose.rightElbow;
+            document.getElementById('left-leg-y').value = pose.leftLegY;
+            document.getElementById('left-knee').value = pose.leftKnee;
+            document.getElementById('right-leg-y').value = pose.rightLegY;
+            document.getElementById('right-knee').value = pose.rightKnee;
         }
+        
+        // Обработчик изменения размеров окна
+        function onWindowResize() {
+            const container = document.getElementById('scene-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+        
+        // Анимационный цикл
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        // Запускаем инициализацию
+        window.addEventListener('load', init);
     </script>
-    
 </body>
 </html>
